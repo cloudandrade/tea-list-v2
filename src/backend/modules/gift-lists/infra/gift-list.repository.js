@@ -87,6 +87,12 @@ export async function updateGiftListForUser(listId, userId, data) {
   return toGiftList(list);
 }
 
+export async function deleteGiftListForUser(listId, userId) {
+  await connectMongo();
+  const result = await GiftListModel.deleteOne({ _id: listId, userId });
+  return result.deletedCount > 0;
+}
+
 export async function publicHashExists(publicHash) {
   await connectMongo();
   return Boolean(await GiftListModel.exists({ publicHash }));

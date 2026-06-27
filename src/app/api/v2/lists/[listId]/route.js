@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@/backend/modules/auth/application/get-current-user';
+import { deleteGiftList } from '@/backend/modules/gift-lists/application/delete-gift-list';
 import { getUserGiftList } from '@/backend/modules/gift-lists/application/get-user-gift-list';
 import { updateGiftList } from '@/backend/modules/gift-lists/application/update-gift-list';
 import { badRequest, json, unauthorized } from '@/backend/shared/http/responses';
@@ -43,4 +44,21 @@ export async function PATCH(request, { params }) {
   }
 
   return json({ list: result.list });
+}
+
+export async function DELETE(_request, { params }) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return unauthorized();
+  }
+
+  const { listId } = await params;
+  const result = await deleteGiftList({ listId, userId: user.id });
+
+  if (!result.ok) {
+    return json({ error: result.message }, { status: result.status });
+  }
+
+  return json({ ok: true });
 }

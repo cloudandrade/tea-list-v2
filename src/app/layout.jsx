@@ -1,5 +1,4 @@
 import './globals.css';
-import AppStartup from './components/AppStartup';
 import { NavigationLoadingProvider } from './components/NavigationLoadingProvider';
 import { ToastProvider } from './components/ToastProvider';
 
@@ -18,7 +17,7 @@ export default function RootLayout({ children }) {
       <body>
         <ToastProvider>
           <NavigationLoadingProvider>
-            <AppStartup>{children}</AppStartup>
+            {children}
           </NavigationLoadingProvider>
         </ToastProvider>
       </body>

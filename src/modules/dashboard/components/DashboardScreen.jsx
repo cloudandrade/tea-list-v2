@@ -40,6 +40,13 @@ const paletteColors = {
   blue: '#7c90a0',
   rose: '#e6a4b4',
   gold: '#d4ad68',
+  wine: '#7b2f46',
+  navy: '#2f465c',
+  sage: '#8a9a78',
+  lavender: '#9b87ad',
+  cocoa: '#6b4a3a',
+  coral: '#c96f5d',
+  mint: '#6fa18a',
 };
 
 function makeCoverBackground(imageUrl, color) {

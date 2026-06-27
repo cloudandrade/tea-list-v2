@@ -65,10 +65,16 @@
 }
 
 .listThemeSurface {
+  position: relative;
   border-radius: 22px;
   background:
     radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--list-color) 16%, transparent) 0 12%, transparent 13%),
     linear-gradient(135deg, color-mix(in srgb, var(--list-color) 10%, #fff8f5), #fff8f5);
+}
+
+.listThemeSurface > * {
+  position: relative;
+  z-index: 1;
 }
 
 .stack {
@@ -259,6 +265,7 @@
 }
 
 .themePreview {
+  position: relative;
   display: grid;
   min-height: 280px;
   place-items: center;
@@ -268,6 +275,11 @@
   background:
     radial-gradient(circle at 20% 72%, color-mix(in srgb, var(--preview-color) 46%, transparent) 0 14%, transparent 15%),
     linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 24%, #fff8f5), #fff8f5);
+}
+
+.themePreview > * {
+  position: relative;
+  z-index: 1;
 }
 
 .themePreviewdots {
@@ -290,6 +302,58 @@
   background:
     radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--preview-color) 42%, transparent) 0 10%, transparent 11%),
     linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 22%, #fff8f5), #fff8f5);
+}
+
+.themePreviewgingham {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--preview-color) 16%, transparent) 50%, transparent 50%) 0 0 / 34px 34px,
+    linear-gradient(color-mix(in srgb, var(--preview-color) 14%, transparent) 50%, transparent 50%) 0 0 / 34px 34px,
+    linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 12%, #fff8f5), #fff8f5);
+}
+
+.themePreviewwaves {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23000000' fill-opacity='0.16' d='M0,64L13.3,85.3C26.7,107,53,149,80,181.3C106.7,213,133,235,160,202.7C186.7,171,213,85,240,90.7C266.7,96,293,192,320,234.7C346.7,277,373,267,400,218.7C426.7,171,453,85,480,53.3C506.7,21,533,43,560,90.7C586.7,139,613,213,640,234.7C666.7,256,693,224,720,181.3C746.7,139,773,85,800,101.3C826.7,117,853,203,880,240C906.7,277,933,267,960,224C986.7,181,1013,107,1040,90.7C1066.7,75,1093,117,1120,149.3C1146.7,181,1173,203,1200,197.3C1226.7,192,1253,160,1280,170.7C1306.7,181,1333,235,1360,250.7C1386.7,267,1413,245,1427,234.7L1440,224L1440,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") 0 0 / 180px 40px repeat,
+    linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 20%, transparent), transparent),
+    linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 16%, #fff8f5), #fff8f5);
+  background-blend-mode: soft-light, normal, normal;
+}
+
+.themePreviewgradient {
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--preview-color) 38%, transparent) 0 16%, transparent 17%),
+    radial-gradient(circle at 82% 74%, color-mix(in srgb, var(--preview-color) 28%, transparent) 0 18%, transparent 19%),
+    linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 32%, #fff8f5), #fff8f5 58%, color-mix(in srgb, var(--preview-color) 18%, #efe6e2));
+}
+
+.themePreviewfloral,
+.themePreviewconfetti {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--preview-color) 14%, #fff8f5), #fff8f5);
+}
+
+.themePreviewfloral::before,
+.themePreviewconfetti::before {
+  position: absolute;
+  inset: -18%;
+  background: var(--preview-color);
+  content: '';
+  opacity: 0.2;
+  --g: /37.02% 37.02% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
+  mask:
+    100% 50% var(--g),
+    65.451% 97.553% var(--g),
+    9.549% 79.389% var(--g),
+    9.549% 20.611% var(--g),
+    65.451% 2.447% var(--g),
+    radial-gradient(100% 100%, #000 25.476%, #0000 calc(25.476% + 1px));
+  transform: scale(0.28);
+  transform-origin: top left;
+  filter:
+    drop-shadow(360px 20px 0 var(--preview-color))
+    drop-shadow(720px 120px 0 var(--preview-color))
+    drop-shadow(180px 360px 0 var(--preview-color))
+    drop-shadow(560px 420px 0 var(--preview-color))
+    drop-shadow(920px 300px 0 var(--preview-color));
 }
 
 .themePreviewCard {
@@ -635,6 +699,65 @@
   background:
     radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--list-color) 34%, transparent) 0 10%, transparent 11%),
     linear-gradient(135deg, color-mix(in srgb, var(--list-color) 18%, #fff8f5), #fff8f5);
+}
+
+.listPatterngingham {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--list-color) 14%, transparent) 50%, transparent 50%) 0 0 / 34px 34px,
+    linear-gradient(color-mix(in srgb, var(--list-color) 12%, transparent) 50%, transparent 50%) 0 0 / 34px 34px,
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 12%, #fff8f5), #fff8f5);
+}
+
+.listPatternwaves {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23000000' fill-opacity='0.16' d='M0,64L13.3,85.3C26.7,107,53,149,80,181.3C106.7,213,133,235,160,202.7C186.7,171,213,85,240,90.7C266.7,96,293,192,320,234.7C346.7,277,373,267,400,218.7C426.7,171,453,85,480,53.3C506.7,21,533,43,560,90.7C586.7,139,613,213,640,234.7C666.7,256,693,224,720,181.3C746.7,139,773,85,800,101.3C826.7,117,853,203,880,240C906.7,277,933,267,960,224C986.7,181,1013,107,1040,90.7C1066.7,75,1093,117,1120,149.3C1146.7,181,1173,203,1200,197.3C1226.7,192,1253,160,1280,170.7C1306.7,181,1333,235,1360,250.7C1386.7,267,1413,245,1427,234.7L1440,224L1440,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") 0 0 / 180px 40px repeat,
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 18%, transparent), transparent),
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 14%, #fff8f5), #fff8f5);
+  background-blend-mode: soft-light, normal, normal;
+}
+
+.listPatterngradient {
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--list-color) 34%, transparent) 0 16%, transparent 17%),
+    radial-gradient(circle at 82% 74%, color-mix(in srgb, var(--list-color) 26%, transparent) 0 18%, transparent 19%),
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 28%, #fff8f5), #fff8f5 58%, color-mix(in srgb, var(--list-color) 16%, #efe6e2));
+}
+
+.listPatternfloral,
+.listPatternconfetti {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--list-color) 12%, #fff8f5), #fff8f5);
+}
+
+.listPatternfloral::before,
+.listPatternconfetti::before {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  background: var(--list-color);
+  content: '';
+  opacity: 0.18;
+  pointer-events: none;
+  --g: /37.02% 37.02% radial-gradient(#000 calc(71% - 1px), #0000 71%) no-repeat;
+  mask:
+    100% 50% var(--g),
+    65.451% 97.553% var(--g),
+    9.549% 79.389% var(--g),
+    9.549% 20.611% var(--g),
+    65.451% 2.447% var(--g),
+    radial-gradient(100% 100%, #000 25.476%, #0000 calc(25.476% + 1px));
+  transform: scale(0.18);
+  transform-origin: top left;
+  filter:
+    drop-shadow(420px 0 0 var(--list-color))
+    drop-shadow(840px 92px 0 var(--list-color))
+    drop-shadow(1260px 0 0 var(--list-color))
+    drop-shadow(140px 460px 0 var(--list-color))
+    drop-shadow(600px 520px 0 var(--list-color))
+    drop-shadow(1040px 440px 0 var(--list-color))
+    drop-shadow(1480px 520px 0 var(--list-color))
+    drop-shadow(220px 900px 0 var(--list-color))
+    drop-shadow(820px 920px 0 var(--list-color))
+    drop-shadow(1320px 860px 0 var(--list-color));
 }
 
 .listHero .sectionTitle {

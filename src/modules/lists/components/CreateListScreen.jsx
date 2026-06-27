@@ -18,11 +18,22 @@ const palettes = [
   { id: 'blue', color: '#7c90a0' },
   { id: 'rose', color: '#e6a4b4' },
   { id: 'gold', color: '#d4ad68' },
+  { id: 'wine', color: '#7b2f46' },
+  { id: 'navy', color: '#2f465c' },
+  { id: 'sage', color: '#8a9a78' },
+  { id: 'lavender', color: '#9b87ad' },
+  { id: 'cocoa', color: '#6b4a3a' },
+  { id: 'coral', color: '#c96f5d' },
+  { id: 'mint', color: '#6fa18a' },
 ];
 const patterns = [
   { id: 'plain', label: 'Liso' },
   { id: 'dots', label: 'Pontilhado' },
   { id: 'stripes', label: 'Listrado' },
+  { id: 'gingham', label: 'Xadrez' },
+  { id: 'waves', label: 'Ondas' },
+  { id: 'gradient', label: 'Degradê' },
+  { id: 'floral', label: 'Floral' },
 ];
 const displayModes = [
   { id: 'blocks', label: 'Blocos' },

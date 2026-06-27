@@ -35,6 +35,12 @@ export function updateList(listId, payload) {
   });
 }
 
+export function deleteList(listId) {
+  return requestJson(`/api/v2/lists/${listId}`, {
+    method: 'DELETE',
+  });
+}
+
 export function createListItem(listId, payload) {
   return requestJson(`/api/v2/lists/${listId}/items`, {
     method: 'POST',

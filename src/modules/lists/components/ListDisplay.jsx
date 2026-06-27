@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useToast } from '@/app/components/ToastProvider';
-import { PencilIcon } from '@/modules/auth/components/icons';
+import { PencilIcon, TrashIcon } from '@/modules/auth/components/icons';
 import { reservePublicItem } from '../services/listApi';
 import styles from './lists.module.css';
 
@@ -31,15 +31,14 @@ const paletteColors = {
   blue: '#7c90a0',
   rose: '#e6a4b4',
   gold: '#d4ad68',
+  wine: '#7b2f46',
+  navy: '#2f465c',
+  sage: '#8a9a78',
+  lavender: '#9b87ad',
+  cocoa: '#6b4a3a',
+  coral: '#c96f5d',
+  mint: '#6fa18a',
 };
-
-function TrashIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
-      <path d="M5 7h14M10 11v6m4-6v6M8 7l1-3h6l1 3m-9 0 1 13h8l1-13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function ReserveForm({ publicHash, item, onReserved }) {
   const { showToast } = useToast();

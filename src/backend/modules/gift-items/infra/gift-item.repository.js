@@ -128,3 +128,9 @@ export async function deleteGiftItem({ listId, itemId, userId }) {
   const result = await GiftItemModel.deleteOne({ _id: itemId, listId, userId });
   return result.deletedCount > 0;
 }
+
+export async function deleteGiftItemsByList({ listId, userId }) {
+  await connectMongo();
+  const result = await GiftItemModel.deleteMany({ listId, userId });
+  return result.deletedCount;
+}
