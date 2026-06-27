@@ -177,6 +177,49 @@ a {
   color: var(--color-muted);
 }
 
+.language-switcher {
+  position: relative;
+  display: inline-flex;
+  width: 68px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border: 1px solid rgba(217, 194, 186, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 248, 245, 0.88);
+  box-shadow: 0 10px 26px rgba(30, 27, 24, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.language-switcher-flag {
+  width: 26px;
+  height: 18px;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(30, 27, 24, 0.08);
+  pointer-events: none;
+}
+
+.language-switcher select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 100%;
+  border: 0;
+  border-radius: 999px;
+  color: transparent;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.language-switcher option {
+  color: var(--color-text);
+}
+
 .app-loading-screen {
   display: grid;
   min-height: 100vh;

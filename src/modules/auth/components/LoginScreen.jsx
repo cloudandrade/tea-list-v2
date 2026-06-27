@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { login } from '../services/authApi';
@@ -34,6 +35,7 @@ function getSavedLogin() {
 export default function LoginScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { t } = useI18n();
   const { startNavigationLoading, stopNavigationLoading } = useNavigationLoading();
   const [form, setForm] = useState(() => {
     const savedLogin = getSavedLogin();
@@ -92,18 +94,18 @@ export default function LoginScreen() {
             <Image alt="" src="/tea-list-logo.png" width={80} height={80} priority />
           </div>
           <h1 className={styles.brandTitle}>Tea List</h1>
-          <p className={styles.brandText}>Curate your perfect celebration, one thoughtful gift at a time.</p>
+          <p className={styles.brandText}>{t('auth.tagline')}</p>
         </div>
 
         <section className={styles.authCard}>
           <header className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Welcome back</h2>
-            <p className={styles.eyebrow}>Access your registry</p>
+            <h2 className={styles.cardTitle}>{t('auth.welcomeBack')}</h2>
+            <p className={styles.eyebrow}>{t('auth.accessRegistry')}</p>
           </header>
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <label className={styles.field}>
-              <span className={styles.label}>Email Address</span>
+              <span className={styles.label}>{t('auth.email')}</span>
               <span className={styles.inputWrap}>
                 <input
                   className={styles.input}
@@ -121,9 +123,9 @@ export default function LoginScreen() {
 
             <label className={styles.field}>
               <span className={styles.labelRow}>
-                <span className={styles.label}>Password</span>
+                <span className={styles.label}>{t('auth.password')}</span>
                 <button className={styles.forgot} type="button">
-                  Forgot?
+                  {t('auth.forgot')}
                 </button>
               </span>
               <span className={styles.inputWrap}>
@@ -150,11 +152,11 @@ export default function LoginScreen() {
 
             <label className={styles.rememberLogin}>
               <input type="checkbox" checked={rememberLogin} onChange={updateRememberLogin} />
-              <span>Salvar login e senha neste dispositivo</span>
+              <span>{t('auth.remember')}</span>
             </label>
 
             <button className="primary-button" disabled={loading} type="submit">
-              {loading ? 'Entrando...' : 'Sign in to Account'}
+              {loading ? t('auth.signingIn') : t('auth.signIn')}
               <ArrowRightIcon width="18" height="18" />
             </button>
           </form>
@@ -163,14 +165,14 @@ export default function LoginScreen() {
 
         <footer className={styles.authFooter}>
           <p className={styles.switchText}>
-            New to the community? <Link href="/register">Register for an account</Link>
+            {t('auth.newCommunity')} <Link href="/register">{t('auth.registerLink')}</Link>
           </p>
           <p className={styles.finePrint}>
-            <span>Privacy Policy</span>
+            <span>{t('auth.privacy')}</span>
             <span>•</span>
-            <span>Terms of Service</span>
+            <span>{t('auth.terms')}</span>
             <span>•</span>
-            <span>Help Center</span>
+            <span>{t('auth.help')}</span>
           </p>
         </footer>
       </section>

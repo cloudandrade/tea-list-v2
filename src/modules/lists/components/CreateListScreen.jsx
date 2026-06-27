@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { LanguageSwitcher, useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { BackIcon, LogoutIcon, PlusIcon } from '@/modules/auth/components/icons';
@@ -11,7 +12,14 @@ import { createList, getList, updateList } from '../services/listApi';
 import ListBottomNav from './ListBottomNav';
 import styles from './lists.module.css';
 
-const celebrationTypes = ['Casamento', 'Casa Nova', 'Chá de Bebê', 'Aniversário', 'Missionário', 'Outro'];
+const celebrationTypes = [
+  { value: 'Casamento', labelKey: 'lists.celebrationWedding' },
+  { value: 'Casa Nova', labelKey: 'lists.celebrationNewHome' },
+  { value: 'Chá de Bebê', labelKey: 'lists.celebrationBaby' },
+  { value: 'Aniversário', labelKey: 'lists.celebrationBirthday' },
+  { value: 'Missionário', labelKey: 'lists.celebrationMissionary' },
+  { value: 'Outro', labelKey: 'lists.celebrationOther' },
+];
 const palettes = [
   { id: 'terracotta', color: '#86452a' },
   { id: 'olive', color: '#586330' },
@@ -27,26 +35,19 @@ const palettes = [
   { id: 'mint', color: '#6fa18a' },
 ];
 const patterns = [
-  { id: 'plain', label: 'Liso' },
-  { id: 'dots', label: 'Pontilhado' },
-  { id: 'stripes', label: 'Listrado' },
-  { id: 'gingham', label: 'Xadrez' },
-  { id: 'waves', label: 'Ondas' },
-  { id: 'gradient', label: 'Degradê' },
-  { id: 'floral', label: 'Floral' },
+  { id: 'plain', labelKey: 'lists.patternPlain' },
+  { id: 'dots', labelKey: 'lists.patternDots' },
+  { id: 'stripes', labelKey: 'lists.patternStripes' },
+  { id: 'gingham', labelKey: 'lists.patternGingham' },
+  { id: 'waves', labelKey: 'lists.patternWaves' },
+  { id: 'gradient', labelKey: 'lists.patternGradient' },
+  { id: 'floral', labelKey: 'lists.patternFloral' },
 ];
 const displayModes = [
-  { id: 'blocks', label: 'Blocos' },
-  { id: 'detailed', label: 'Lista detalhada' },
-  { id: 'compact', label: 'Lista compacta' },
+  { id: 'blocks', labelKey: 'lists.displayBlocks' },
+  { id: 'detailed', labelKey: 'lists.displayDetailed' },
+  { id: 'compact', labelKey: 'lists.displayCompact' },
 ];
-const previewItems = [
-  { name: 'Jogo de jantar artesanal', price: 'R$ 189,90', description: 'Peças delicadas para receber com carinho.' },
-  { name: 'Kit café da manhã', price: 'R$ 94,00', description: 'Uma seleção charmosa para a nova rotina.' },
-  { name: 'Manta decorativa', price: 'R$ 120,00', description: 'Textura macia em tons neutros.' },
-  { name: 'Vaso em cerâmica', price: 'R$ 76,50', description: 'Um detalhe afetivo para compor a casa.' },
-];
-
 const emptyForm = {
   title: '',
   subtitle: '',
@@ -61,11 +62,19 @@ const emptyForm = {
 export default function CreateListScreen({ listId = '', mode = 'create' }) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { t } = useI18n();
   const { startNavigationLoading, stopNavigationLoading } = useNavigationLoading();
   const [form, setForm] = useState(emptyForm);
   const [initialLoading, setInitialLoading] = useState(mode === 'edit');
   const [loading, setLoading] = useState(false);
   const selectedPalette = palettes.find((palette) => palette.id === form.colorPalette) || palettes[0];
+  const selectedType = celebrationTypes.find((type) => type.value === form.type);
+  const previewItems = [
+    { name: t('lists.previewItemDinner'), price: 'R$ 189,90', description: t('lists.previewItemDinnerDescription') },
+    { name: t('lists.previewItemBreakfast'), price: 'R$ 94,00', description: t('lists.previewItemBreakfastDescription') },
+    { name: t('lists.previewItemBlanket'), price: 'R$ 120,00', description: t('lists.previewItemBlanketDescription') },
+    { name: t('lists.previewItemVase'), price: 'R$ 76,50', description: t('lists.previewItemVaseDescription') },
+  ];
   const isEdit = mode === 'edit';
 
   useEffect(() => {
@@ -123,7 +132,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
     }
 
     if (!file.type.startsWith('image/')) {
-      showToast({ type: 'error', message: 'Selecione um arquivo de imagem válido.' });
+      showToast({ type: 'error', message: t('lists.invalidImage') });
       return;
     }
 
@@ -152,7 +161,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
       startNavigationLoading();
       router.push(isEdit ? `/dashboard/lists/${response.list.id}` : `/dashboard/lists/${response.list.id}/items`);
       router.refresh();
-      showToast({ type: 'success', message: isEdit ? 'Lista atualizada.' : 'Lista criada.' });
+      showToast({ type: 'success', message: isEdit ? t('lists.listUpdated') : t('lists.listCreated') });
     } catch (requestError) {
       stopNavigationLoading();
       showToast({ type: 'error', message: requestError.message });
@@ -164,7 +173,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
   if (initialLoading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>Carregando lista...</section>
+        <section className={styles.main}>{t('lists.loadingList')}</section>
       </main>
     );
   }
@@ -179,24 +188,27 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
           <BackIcon width="22" height="22" />
         </button>
         <h1 className={styles.topTitle}>Tea List</h1>
-        <button className="icon-button" type="button" onClick={handleLogout} aria-label="Sair">
-          <LogoutIcon width="22" height="22" />
-        </button>
+        <div className={styles.headerActions}>
+          <LanguageSwitcher />
+          <button className="icon-button" type="button" onClick={handleLogout} aria-label={t('common.logout')}>
+            <LogoutIcon width="22" height="22" />
+          </button>
+        </div>
       </header>
 
       <section className={styles.main}>
         <form className={`${styles.stack} ${styles.stackTwoColumns}`} onSubmit={handleSubmit}>
           <section className={styles.panel}>
-            <h2 className={styles.sectionTitle}>{isEdit ? 'Editar Lista' : 'Detalhes da Lista'}</h2>
-            <p className={styles.sectionText}>Personalize sua celebração com detalhes que contam sua história.</p>
+            <h2 className={styles.sectionTitle}>{isEdit ? t('lists.editList') : t('lists.createDetails')}</h2>
+            <p className={styles.sectionText}>{t('lists.listDetailsText')}</p>
 
             <div className={styles.form}>
               <label className={styles.field}>
-                <span className={styles.label}>Título da Lista</span>
+                <span className={styles.label}>{t('lists.listTitle')}</span>
                 <input
                   className={`${styles.input} ${styles.titleInput}`}
                   name="title"
-                  placeholder="Ex: O Casamento de Ana & João"
+                  placeholder={t('lists.listTitlePlaceholder')}
                   value={form.title}
                   onChange={updateField}
                   required
@@ -204,34 +216,34 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
               </label>
 
               <label className={styles.field}>
-                <span className={styles.label}>Subtítulo (Opcional)</span>
+                <span className={styles.label}>{t('lists.subtitleOptional')}</span>
                 <input
                   className={styles.input}
                   name="subtitle"
-                  placeholder="Ex: Uma nova jornada começa aqui"
+                  placeholder={t('lists.subtitlePlaceholder')}
                   value={form.subtitle}
                   onChange={updateField}
                 />
               </label>
 
               <div className={styles.fieldPlain}>
-                <span className={styles.label}>Tipo de Celebração</span>
+                <span className={styles.label}>{t('lists.celebrationType')}</span>
                 <div className={styles.optionGrid}>
                   {celebrationTypes.map((type) => (
                     <button
-                      className={`${styles.optionButton} ${form.type === type ? styles.optionButtonActive : ''}`}
-                      key={type}
+                      className={`${styles.optionButton} ${form.type === type.value ? styles.optionButtonActive : ''}`}
+                      key={type.value}
                       type="button"
-                      onClick={() => setForm((current) => ({ ...current, type }))}
+                      onClick={() => setForm((current) => ({ ...current, type: type.value }))}
                     >
-                      {type}
+                      {t(type.labelKey)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className={styles.fieldPlain}>
-                <span className={styles.label}>Modo de Exibição</span>
+                <span className={styles.label}>{t('lists.displayMode')}</span>
                 <div className={styles.optionGrid}>
                   {displayModes.map((mode) => (
                     <button
@@ -240,18 +252,18 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
                       type="button"
                       onClick={() => setForm((current) => ({ ...current, displayMode: mode.id }))}
                     >
-                      {mode.label}
+                      {t(mode.labelKey)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <label className={styles.field}>
-                <span className={styles.label}>Mensagem aos Convidados (Opcional)</span>
+                <span className={styles.label}>{t('lists.guestMessageOptional')}</span>
                 <textarea
                   className={styles.textarea}
                   name="message"
-                  placeholder="Sua mensagem calorosa aqui..."
+                  placeholder={t('lists.guestMessagePlaceholder')}
                   value={form.message}
                   onChange={updateField}
                 />
@@ -271,16 +283,16 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
                 onChange={handleCoverImageChange}
               />
               <span className={styles.previewInner}>
-                {form.coverImageUrl ? 'Alterar imagem de capa' : 'Escolha uma imagem de capa'}
+                {form.coverImageUrl ? t('lists.coverChange') : t('lists.coverChoose')}
               </span>
             </label>
 
             <section className={styles.panel}>
-              <h3 className={styles.sectionText}>Identidade Visual</h3>
+              <h3 className={styles.sectionText}>{t('lists.visualIdentity')}</h3>
 
               <div className={styles.form}>
                 <div className={styles.fieldPlain}>
-                  <span className={styles.label}>Paleta de Cores</span>
+                  <span className={styles.label}>{t('lists.colorPalette')}</span>
                   <div className={styles.paletteRow}>
                     {palettes.map((palette) => (
                       <button
@@ -296,7 +308,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
                 </div>
 
                 <div className={styles.fieldPlain}>
-                  <span className={styles.label}>Textura de Fundo</span>
+                  <span className={styles.label}>{t('lists.backgroundTexture')}</span>
                   <div className={styles.patternRow}>
                     {patterns.map((pattern) => (
                       <button
@@ -305,23 +317,23 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
                         type="button"
                         onClick={() => setForm((current) => ({ ...current, backgroundPattern: pattern.id }))}
                       >
-                        {pattern.label}
+                        {t(pattern.labelKey)}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div className={styles.themePreviewBlock}>
-                  <span className={styles.label}>Prévia do tema</span>
+                  <span className={styles.label}>{t('lists.themePreview')}</span>
                   <div
                     className={`${styles.themePreview} ${styles[`themePreview${form.backgroundPattern}`]}`}
                     style={{ '--preview-color': selectedPalette.color }}
                   >
                     <div className={styles.themePreviewCard}>
                       <div className={styles.themePreviewHeader}>
-                        <span className={styles.themePreviewBadge}>{form.type}</span>
-                        <strong>{form.title || 'Título da sua lista'}</strong>
-                        <span>{form.displayMode === 'compact' ? 'Visual compacto' : 'Visual com detalhes'}</span>
+                        <span className={styles.themePreviewBadge}>{selectedType ? t(selectedType.labelKey) : form.type}</span>
+                        <strong>{form.title || t('lists.previewTitle')}</strong>
+                        <span>{form.displayMode === 'compact' ? t('lists.compactView') : t('lists.detailedView')}</span>
                       </div>
 
                       {form.displayMode === 'blocks' ? (
@@ -361,7 +373,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
                           {previewItems.map((item) => (
                             <div className={styles.previewCompactItem} key={item.name}>
                               <span>{item.name}</span>
-                              <strong>Reservar</strong>
+                              <strong>{t('lists.reserve')}</strong>
                             </div>
                           ))}
                         </div>
@@ -372,7 +384,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
 
                 <button className="primary-button" disabled={loading} type="submit">
                   <PlusIcon width="18" height="18" />
-                  {loading ? 'Salvando...' : isEdit ? 'Salvar Alterações' : 'Salvar e Gerar Lista'}
+                  {loading ? t('lists.saving') : isEdit ? t('lists.saveChanges') : t('lists.saveList')}
                 </button>
               </div>
             </section>

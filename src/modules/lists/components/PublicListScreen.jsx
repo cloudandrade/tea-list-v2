@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { getPublicList } from '../services/listApi';
 import ListDisplay from './ListDisplay';
@@ -23,6 +24,7 @@ const paletteColors = {
 
 export default function PublicListScreen({ publicHash }) {
   const { showToast } = useToast();
+  const { t } = useI18n();
   const [list, setList] = useState(null);
   const [items, setItems] = useState([]);
   const [error, setError] = useState('');
@@ -61,7 +63,7 @@ export default function PublicListScreen({ publicHash }) {
   if (loading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>Carregando lista pública...</section>
+        <section className={styles.main}>{t('lists.loadingPublicList')}</section>
       </main>
     );
   }
@@ -71,7 +73,7 @@ export default function PublicListScreen({ publicHash }) {
       <main className={styles.page}>
         <section className={styles.main}>
           <div className={styles.emptyState}>
-            <h1 className={styles.itemName}>Não foi possível carregar esta lista</h1>
+            <h1 className={styles.itemName}>{t('lists.publicLoadErrorTitle')}</h1>
             <p className={styles.itemDescription}>{error}</p>
           </div>
         </section>

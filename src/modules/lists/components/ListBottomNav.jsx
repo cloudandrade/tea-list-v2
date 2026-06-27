@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import styles from '@/modules/dashboard/components/dashboard.module.css';
 
@@ -32,6 +33,7 @@ function UserIcon(props) {
 
 export default function ListBottomNav({ active = 'create' }) {
   const router = useRouter();
+  const { t } = useI18n();
   const { startNavigationLoading } = useNavigationLoading();
 
   return (
@@ -46,7 +48,7 @@ export default function ListBottomNav({ active = 'create' }) {
           }}
         >
           <GridIcon className={styles.navIcon} />
-          Dashboard
+          {t('common.dashboard')}
         </button>
         <button
           className={`${styles.navItem} ${active === 'create' ? styles.navItemActive : ''}`}
@@ -57,11 +59,11 @@ export default function ListBottomNav({ active = 'create' }) {
           }}
         >
           <GiftIcon className={styles.navIcon} />
-          Create
+          {t('common.create')}
         </button>
         <button className={`${styles.navItem} ${active === 'profile' ? styles.navItemActive : ''}`} type="button">
           <UserIcon className={styles.navIcon} />
-          Profile
+          {t('common.profile')}
         </button>
       </div>
     </nav>

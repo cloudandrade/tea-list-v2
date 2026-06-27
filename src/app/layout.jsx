@@ -1,4 +1,5 @@
 import './globals.css';
+import { I18nProvider } from './components/I18nProvider';
 import { NavigationLoadingProvider } from './components/NavigationLoadingProvider';
 import { ToastProvider } from './components/ToastProvider';
 
@@ -16,9 +17,11 @@ export default function RootLayout({ children }) {
     <html lang="pt-BR">
       <body>
         <ToastProvider>
-          <NavigationLoadingProvider>
-            {children}
-          </NavigationLoadingProvider>
+          <I18nProvider>
+            <NavigationLoadingProvider>
+              {children}
+            </NavigationLoadingProvider>
+          </I18nProvider>
         </ToastProvider>
       </body>
     </html>

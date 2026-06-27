@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "country-flag-icons": "^1.6.19",
     "mongoose": "^8.0.0",
     "next": "^16.2.9",
     "react": "^19.2.7",

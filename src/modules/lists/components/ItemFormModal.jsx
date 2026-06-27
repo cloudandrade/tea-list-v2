@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { PlusIcon } from '@/modules/auth/components/icons';
 import { compressImageFile } from '../services/imageCompression';
@@ -39,6 +40,7 @@ function makeInitialForm(item) {
 
 export default function ItemFormModal({ mode = 'create', item = null, onClose, onSubmit }) {
   const { showToast } = useToast();
+  const { t } = useI18n();
   const [form, setForm] = useState(() => makeInitialForm(item));
   const [saving, setSaving] = useState(false);
   const isEdit = mode === 'edit';
@@ -59,7 +61,7 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
     }
 
     if (!file.type.startsWith('image/')) {
-      showToast({ type: 'error', message: 'Selecione um arquivo de imagem válido.' });
+      showToast({ type: 'error', message: t('lists.invalidImage') });
       return;
     }
 
@@ -93,21 +95,21 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
       <section className={`${styles.reserveModal} ${styles.itemFormModal}`} role="dialog" aria-modal="true" aria-labelledby="item-form-title" onClick={(event) => event.stopPropagation()}>
         <header>
           <h3 className={styles.modalTitle} id="item-form-title">
-            {isEdit ? 'Editar item' : 'Adicionar item'}
+            {isEdit ? t('lists.editItem') : t('lists.addItem')}
           </h3>
           <p className={styles.modalText}>
-            {isEdit ? 'Atualize os dados e a imagem do item.' : 'Cadastre um novo item para sua lista.'}
+            {isEdit ? t('lists.editItemText') : t('lists.addItemText')}
           </p>
         </header>
 
         <form className={`${styles.form} ${styles.itemFormGrid}`} onSubmit={handleSubmit}>
           <div className={styles.itemFormFields}>
             <label className={styles.fieldPlain}>
-              <span className={styles.label}>Nome do Item</span>
+              <span className={styles.label}>{t('lists.itemName')}</span>
               <input
                 className={styles.reserveInput}
                 name="name"
-                placeholder="Ex: Conjunto de Chá de Porcelana"
+                placeholder={t('lists.itemNamePlaceholder')}
                 value={form.name}
                 onChange={updateField}
                 required
@@ -115,7 +117,7 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
             </label>
 
             <label className={styles.fieldPlain}>
-              <span className={styles.label}>Preço aproximado</span>
+              <span className={styles.label}>{t('lists.approximatePrice')}</span>
               <input
                 className={styles.reserveInput}
                 name="price"
@@ -128,7 +130,7 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
 
             {!isEdit ? (
               <div className={styles.fieldPlain}>
-                <span className={styles.label}>Quantidade</span>
+                <span className={styles.label}>{t('lists.quantity')}</span>
                 <div className={styles.quantityRow}>
                   <button className={styles.quantityButton} type="button" onClick={() => changeQuantity(-1)}>
                     -
@@ -142,11 +144,11 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
             ) : null}
 
             <label className={styles.fieldPlain}>
-              <span className={styles.label}>Descrição (Opcional)</span>
+              <span className={styles.label}>{t('lists.descriptionOptional')}</span>
               <textarea
                 className={styles.reserveInput}
                 name="description"
-                placeholder="Conte aos seus convidados por que você escolheu este item..."
+                placeholder={t('lists.itemDescriptionPlaceholder')}
                 rows={5}
                 value={form.description}
                 onChange={updateField}
@@ -154,7 +156,7 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
             </label>
 
             <label className={styles.fieldPlain}>
-              <span className={styles.label}>URL da imagem (Opcional)</span>
+              <span className={styles.label}>{t('lists.imageUrlOptional')}</span>
               <input
                 className={styles.reserveInput}
                 name="imageUrl"
@@ -166,29 +168,29 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
           </div>
 
           <aside className={styles.itemFormImagePanel}>
-            <h4 className={styles.itemFormImageTitle}>Imagem do Item</h4>
+            <h4 className={styles.itemFormImageTitle}>{t('lists.itemImage')}</h4>
             <label
               className={`${styles.itemUpload} ${form.imageUrl ? styles.itemUploadWithImage : ''}`}
               style={makeImageBackground(form.imageUrl)}
             >
               <input className={styles.fileInput} type="file" accept="image/*" onChange={handleItemImageChange} />
               <div>
-                <strong>Upload de Foto</strong>
-                <p>{form.imageUrl ? 'Clique para alterar a imagem.' : 'Informe uma URL ou clique para buscar.'}</p>
+                <strong>{t('lists.uploadPhoto')}</strong>
+                <p>{form.imageUrl ? t('lists.changeImage') : t('lists.imageHint')}</p>
               </div>
             </label>
             <p className={styles.sectionText}>
-              &quot;Uma boa imagem ajuda seus convidados a escolherem o presente perfeito.&quot;
+              {t('lists.imageQuote')}
             </p>
           </aside>
 
           <div className={`${styles.modalActions} ${styles.itemFormActions}`}>
             <button className={styles.itemFormSecondaryButton} type="button" disabled={saving} onClick={onClose}>
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button className={styles.itemFormPrimaryButton} disabled={saving} type="submit">
               {!isEdit ? <PlusIcon width="18" height="18" /> : null}
-              {saving ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Salvar item'}
+              {saving ? t('lists.saving') : isEdit ? t('lists.saveChanges') : t('lists.saveItem')}
             </button>
           </div>
         </form>

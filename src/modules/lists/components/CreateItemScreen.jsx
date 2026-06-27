@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { createListItem, getList } from '../services/listApi';
@@ -11,6 +12,7 @@ import styles from './lists.module.css';
 export default function CreateItemScreen({ listId }) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { t } = useI18n();
   const { startNavigationLoading, stopNavigationLoading } = useNavigationLoading();
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,7 @@ export default function CreateItemScreen({ listId }) {
   async function handleSubmit(payload) {
     try {
       const response = await createListItem(listId, payload);
-      showToast({ type: 'success', message: `${response.items?.length || 1} item(ns) adicionado(s) à lista.` });
+      showToast({ type: 'success', message: t('lists.itemsAdded', { count: response.items?.length || 1 }) });
       startNavigationLoading();
       router.push(`/dashboard/lists/${listId}`);
     } catch (requestError) {
@@ -60,14 +62,14 @@ export default function CreateItemScreen({ listId }) {
   if (loading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>Carregando lista...</section>
+        <section className={styles.main}>{t('lists.loadingList')}</section>
       </main>
     );
   }
 
   return (
     <main className={styles.page}>
-      <section className={styles.main}>Abrindo cadastro de item...</section>
+      <section className={styles.main}>{t('lists.addItemsOpening')}</section>
       <ItemFormModal
         mode="create"
         onClose={() => {

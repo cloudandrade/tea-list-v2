@@ -2,13 +2,14 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { PencilIcon, TrashIcon } from '@/modules/auth/components/icons';
 import { reservePublicItem } from '../services/listApi';
 import styles from './lists.module.css';
 
-function formatCurrency(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
+function formatCurrency(value, locale) {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
 }
 
 function makeCoverBackground(imageUrl) {
@@ -42,6 +43,7 @@ const paletteColors = {
 
 function ReserveForm({ publicHash, item, onReserved }) {
   const { showToast } = useToast();
+  const { t } = useI18n();
   const [form, setForm] = useState({ guestName: '', guestPhone: '' });
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,7 +59,7 @@ function ReserveForm({ publicHash, item, onReserved }) {
     try {
       const response = await reservePublicItem(publicHash, item.id, form);
       onReserved(response.item);
-      showToast({ type: 'success', message: 'Item reservado com sucesso.' });
+      showToast({ type: 'success', message: t('lists.itemReserved') });
       setForm({ guestName: '', guestPhone: '' });
       setOpen(false);
     } catch (requestError) {
@@ -68,25 +70,25 @@ function ReserveForm({ publicHash, item, onReserved }) {
   }
 
   if (item.isReserved) {
-    return <p className={styles.itemReservedBadge}>Reservado</p>;
+    return <p className={styles.itemReservedBadge}>{t('lists.reserved')}</p>;
   }
 
   return (
     <>
       <button className={styles.reserveButton} type="button" onClick={() => setOpen(true)}>
-        Reservar
+        {t('lists.reserve')}
       </button>
       {open ? (
         <div className={styles.modalOverlay} role="presentation" onClick={() => setOpen(false)}>
           <form className={styles.reserveModal} onSubmit={handleSubmit} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
             <div>
-              <h3 className={styles.modalTitle}>Reservar item</h3>
+              <h3 className={styles.modalTitle}>{t('lists.reserveItem')}</h3>
               <p className={styles.modalText}>{item.name}</p>
             </div>
             <input
               className={styles.reserveInput}
               name="guestName"
-              placeholder="Seu nome"
+              placeholder={t('lists.yourName')}
               value={form.guestName}
               onChange={updateField}
               required
@@ -94,17 +96,17 @@ function ReserveForm({ publicHash, item, onReserved }) {
             <input
               className={styles.reserveInput}
               name="guestPhone"
-              placeholder="Telefone"
+              placeholder={t('lists.phone')}
               value={form.guestPhone}
               onChange={updateField}
               required
             />
             <div className={styles.modalActions}>
               <button className={styles.textButton} type="button" onClick={() => setOpen(false)}>
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button className={styles.reserveButton} disabled={loading} type="submit">
-                {loading ? 'Reservando...' : 'Confirmar'}
+                {loading ? t('lists.reserving') : t('common.confirm')}
               </button>
             </div>
           </form>
@@ -115,12 +117,14 @@ function ReserveForm({ publicHash, item, onReserved }) {
 }
 
 function ManagementActions({ item, onDeleteItem, onEditItem }) {
+  const { t } = useI18n();
+
   return (
     <div className={styles.managementActions}>
-      <button className={styles.managementIconButton} type="button" onClick={() => onEditItem(item)} aria-label={`Editar ${item.name}`}>
+      <button className={styles.managementIconButton} type="button" onClick={() => onEditItem(item)} aria-label={`${t('common.edit')} ${item.name}`}>
         <PencilIcon />
       </button>
-      <button className={`${styles.managementIconButton} ${styles.managementIconDanger}`} type="button" onClick={() => onDeleteItem(item)} aria-label={`Excluir ${item.name}`}>
+      <button className={`${styles.managementIconButton} ${styles.managementIconDanger}`} type="button" onClick={() => onDeleteItem(item)} aria-label={`${t('common.delete')} ${item.name}`}>
         <TrashIcon />
       </button>
     </div>
@@ -128,11 +132,12 @@ function ManagementActions({ item, onDeleteItem, onEditItem }) {
 }
 
 function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onEditItem }) {
+  const { locale, t } = useI18n();
   const compact = displayMode === 'compact';
   const isPublic = Boolean(publicHash);
   const usesVisualCard = isPublic || isManagement;
   const isPublicReserved = isPublic && item.isReserved;
-  const giftedBy = item.reservations?.[0]?.guestName || 'convidado';
+  const giftedBy = item.reservations?.[0]?.guestName || t('lists.anonymousGuest');
   const showImage = usesVisualCard || !compact;
   const showDescription = usesVisualCard || (!compact && item.description);
   const hasPrice = Number(item.price || 0) > 0;
@@ -148,7 +153,7 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
             <div className={styles.reservedImageOverlay}>
               <span className={styles.reservedPill}>
                 <span aria-hidden="true">✓</span>
-                Reservado
+                {t('lists.reserved')}
               </span>
             </div>
           ) : null}
@@ -158,16 +163,16 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
       {showDescription && item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
       {showMeta ? (
         <div className={`${styles.itemMeta} ${usesVisualCard ? styles.publicItemMeta : ''}`}>
-          {hasPrice ? <span>{formatCurrency(item.price)}</span> : <span aria-hidden="true" />}
+          {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : <span aria-hidden="true" />}
           {!usesVisualCard ? (
             <span>
-              {item.availableQuantity} de {item.quantity} disponível
+            {t('lists.available', { available: item.availableQuantity, total: item.quantity })}
             </span>
           ) : null}
           {isPublicReserved ? (
             <span className={styles.giftedBy}>
               <span aria-hidden="true">♙</span>
-              Presenteado por {giftedBy}
+            {t('lists.giftedBy', { name: giftedBy })}
             </span>
           ) : null}
           {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
@@ -188,6 +193,7 @@ export default function ListDisplay({
   onDeleteItem,
   onEditItem,
 }) {
+  const { t } = useI18n();
   const [items, setItems] = useState(initialItems);
   const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
   const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
@@ -228,7 +234,7 @@ export default function ListDisplay({
           </div>
           {list.message ? (
             <div className={styles.listMessage}>
-              <span>Mensagem aos convidados</span>
+              <span>{t('lists.guestMessage')}</span>
               <p>{list.message}</p>
             </div>
           ) : null}
@@ -252,8 +258,8 @@ export default function ListDisplay({
           </div>
         ) : (
           <div className={styles.emptyState}>
-            <h2 className={styles.itemName}>Nenhum item cadastrado ainda</h2>
-            <p className={styles.itemDescription}>Adicione itens para compartilhar sua lista com convidados.</p>
+            <h2 className={styles.itemName}>{t('lists.emptyItemsTitle')}</h2>
+            <p className={styles.itemDescription}>{t('lists.emptyItemsText')}</p>
           </div>
         )}
       </div>

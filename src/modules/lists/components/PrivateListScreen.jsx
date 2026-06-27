@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { BackIcon, PencilIcon, PlusIcon, TrashIcon } from '@/modules/auth/components/icons';
@@ -30,6 +31,7 @@ const paletteColors = {
 export default function PrivateListScreen({ listId }) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { t } = useI18n();
   const { startNavigationLoading } = useNavigationLoading();
   const [list, setList] = useState(null);
   const [items, setItems] = useState([]);
@@ -79,7 +81,7 @@ export default function PrivateListScreen({ listId }) {
     try {
       await updateListItem(listId, itemId, payload);
       await reloadList();
-      showToast({ type: 'success', message: 'Item atualizado.' });
+      showToast({ type: 'success', message: t('lists.itemUpdated') });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
       throw requestError;
@@ -90,7 +92,7 @@ export default function PrivateListScreen({ listId }) {
     try {
       const response = await createListItem(listId, payload);
       await reloadList();
-      showToast({ type: 'success', message: `${response.items?.length || 1} item(ns) adicionado(s) à lista.` });
+      showToast({ type: 'success', message: t('lists.itemsAdded', { count: response.items?.length || 1 }) });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
       throw requestError;
@@ -112,7 +114,7 @@ export default function PrivateListScreen({ listId }) {
       await deleteListItem(listId, pendingDeleteItem.id);
       await reloadList();
       setPendingDeleteItem(null);
-      showToast({ type: 'success', message: 'Item excluído.' });
+      showToast({ type: 'success', message: t('lists.itemDeleted') });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
     } finally {
@@ -125,7 +127,7 @@ export default function PrivateListScreen({ listId }) {
 
     try {
       await deleteList(listId);
-      showToast({ type: 'success', message: 'Lista excluída.' });
+      showToast({ type: 'success', message: t('lists.listDeleted') });
       startNavigationLoading();
       router.replace('/dashboard');
       router.refresh();
@@ -138,7 +140,7 @@ export default function PrivateListScreen({ listId }) {
   if (loading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>Carregando lista...</section>
+        <section className={styles.main}>{t('lists.loadingList')}</section>
       </main>
     );
   }
@@ -155,15 +157,15 @@ export default function PrivateListScreen({ listId }) {
         }} aria-label="Voltar">
           <BackIcon width="22" height="22" />
         </button>
-        <h1 className={styles.topTitle}>Minha Lista</h1>
+        <h1 className={styles.topTitle}>{t('lists.myList')}</h1>
         <div className={styles.headerActions}>
           <button className="icon-button" type="button" onClick={() => {
             startNavigationLoading();
             router.push(`/dashboard/lists/${listId}/edit`);
-          }} aria-label="Editar lista">
+          }} aria-label={t('lists.editList')}>
             <PencilIcon width="21" height="21" />
           </button>
-          <button className="icon-button" type="button" onClick={() => setDeleteListOpen(true)} aria-label="Excluir lista">
+          <button className="icon-button" type="button" onClick={() => setDeleteListOpen(true)} aria-label={t('lists.deleteList')}>
             <TrashIcon width="21" height="21" />
           </button>
           <button className="icon-button" type="button" onClick={() => setItemModal({ mode: 'create', item: null })} aria-label="Adicionar item">
@@ -176,7 +178,7 @@ export default function PrivateListScreen({ listId }) {
         <section className={styles.main}>
           <button className="primary-button" type="button" onClick={() => setItemModal({ mode: 'create', item: null })}>
             <PlusIcon width="18" height="18" />
-            Criar novo item
+            {t('lists.createNewItem')}
           </button>
         </section>
 
@@ -191,9 +193,9 @@ export default function PrivateListScreen({ listId }) {
 
         <section className={styles.main}>
           <div className={styles.publicLinkCard}>
-            <strong>Link público</strong>
+            <strong>{t('lists.publicLink')}</strong>
             <Link className={styles.publicLink} href={`/l/${list.publicHash}`} target="_blank" rel="noopener noreferrer">
-              {`Abrir visualização pública`}
+              {t('lists.openPublicView')}
             </Link>
           </div>
         </section>
@@ -216,17 +218,17 @@ export default function PrivateListScreen({ listId }) {
         <div className={styles.modalOverlay} role="presentation" onClick={() => (deleteLoading ? null : setPendingDeleteItem(null))}>
           <section className={styles.reserveModal} role="dialog" aria-modal="true" aria-labelledby="delete-item-title" onClick={(event) => event.stopPropagation()}>
             <div>
-              <h3 className={styles.modalTitle} id="delete-item-title">Excluir item?</h3>
+              <h3 className={styles.modalTitle} id="delete-item-title">{t('lists.deleteItemTitle')}</h3>
               <p className={styles.modalText}>
-                Tem certeza que deseja excluir &quot;{pendingDeleteItem.name}&quot;? Essa ação não pode ser desfeita.
+                {t('lists.deleteItemText', { name: pendingDeleteItem.name })}
               </p>
             </div>
             <div className={styles.modalActions}>
               <button className={styles.textButton} type="button" disabled={deleteLoading} onClick={() => setPendingDeleteItem(null)}>
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button className={styles.deleteConfirmButton} type="button" disabled={deleteLoading} onClick={handleConfirmDeleteItem}>
-                {deleteLoading ? 'Excluindo...' : 'Excluir item'}
+                {deleteLoading ? t('lists.deleting') : t('lists.deleteItem')}
               </button>
             </div>
           </section>
@@ -237,17 +239,17 @@ export default function PrivateListScreen({ listId }) {
         <div className={styles.modalOverlay} role="presentation" onClick={() => (deleteListLoading ? null : setDeleteListOpen(false))}>
           <section className={styles.reserveModal} role="dialog" aria-modal="true" aria-labelledby="delete-list-title" onClick={(event) => event.stopPropagation()}>
             <div>
-              <h3 className={styles.modalTitle} id="delete-list-title">Excluir lista?</h3>
+              <h3 className={styles.modalTitle} id="delete-list-title">{t('lists.deleteListTitle')}</h3>
               <p className={styles.modalText}>
-                Tem certeza que deseja excluir &quot;{list.title}&quot;? Todos os itens e reservas dessa lista também serão removidos.
+                {t('lists.deleteListText', { title: list.title })}
               </p>
             </div>
             <div className={styles.modalActions}>
               <button className={styles.textButton} type="button" disabled={deleteListLoading} onClick={() => setDeleteListOpen(false)}>
-                Cancelar
+                {t('common.cancel')}
               </button>
               <button className={styles.deleteConfirmButton} type="button" disabled={deleteListLoading} onClick={handleConfirmDeleteList}>
-                {deleteListLoading ? 'Excluindo...' : 'Excluir lista'}
+                {deleteListLoading ? t('lists.deleting') : t('lists.deleteList')}
               </button>
             </div>
           </section>

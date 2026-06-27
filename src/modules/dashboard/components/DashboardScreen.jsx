@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { LanguageSwitcher, useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { getLists, getMe, logout } from '@/modules/auth/services/authApi';
 import { LogoutIcon, PlusIcon } from '@/modules/auth/components/icons';
@@ -61,6 +62,7 @@ function makeCoverBackground(imageUrl, color) {
 }
 
 function ListCard({ list, onManage }) {
+  const { t } = useI18n();
   const progress = list.totalItems ? Math.min((list.reservedItems / list.totalItems) * 100, 100) : 0;
   const themeColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
 
@@ -72,14 +74,14 @@ function ListCard({ list, onManage }) {
         <h3 className={styles.cardTitle}>{list.title}</h3>
         <div className={styles.progressBlock}>
           <p className={styles.progressText}>
-            {list.reservedItems} de {list.totalItems} itens adquiridos
+            {t('dashboard.acquiredItems', { reserved: list.reservedItems, total: list.totalItems })}
           </p>
           <div className={styles.progress} aria-hidden="true">
             <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           </div>
         </div>
         <button className={styles.manageButton} type="button" onClick={() => onManage(list.id)}>
-          Gerenciar Lista
+          {t('dashboard.manageList')}
         </button>
       </div>
     </article>
@@ -88,6 +90,7 @@ function ListCard({ list, onManage }) {
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { t } = useI18n();
   const { startNavigationLoading } = useNavigationLoading();
   const [user, setUser] = useState(null);
   const [lists, setLists] = useState([]);
@@ -147,7 +150,7 @@ export default function DashboardScreen() {
     return (
       <main className={styles.page}>
         <section className={styles.content}>
-          <p>Carregando suas listas...</p>
+          <p>{t('dashboard.loadingLists')}</p>
         </section>
       </main>
     );
@@ -162,18 +165,21 @@ export default function DashboardScreen() {
           </span>
           <h1 className={styles.title}>Tea List</h1>
         </div>
-        <button className="icon-button" type="button" onClick={handleLogout} aria-label="Sair">
-          <LogoutIcon width="22" height="22" />
-        </button>
+        <div className={styles.headerActions}>
+          <LanguageSwitcher />
+          <button className="icon-button" type="button" onClick={handleLogout} aria-label={t('common.logout')}>
+            <LogoutIcon width="22" height="22" />
+          </button>
+        </div>
       </header>
 
       <section className={styles.content}>
         <div className={styles.greeting}>
-          <h2 className={styles.greetingTitle}>Olá, {firstName}</h2>
+          <h2 className={styles.greetingTitle}>{t('dashboard.hello', { name: firstName })}</h2>
           <p className={styles.greetingText}>
             {hasLists
-              ? 'Bem-vindo(a) de volta. Suas listas de presentes e celebrações estão organizadas abaixo.'
-              : 'Bem-vinda de volta. Suas listas reais aparecerão aqui assim que forem criadas.'}
+              ? t('dashboard.welcomeWithLists')
+              : t('dashboard.welcomeEmpty')}
           </p>
         </div>
 
@@ -187,8 +193,8 @@ export default function DashboardScreen() {
               <span className={styles.emptyIcon}>
                 <PlusIcon width="22" height="22" />
               </span>
-              <h3 className={styles.emptyTitle}>Inicie um novo marco</h3>
-              <p className={styles.emptyText}>Você ainda não tem listas cadastradas. Crie a primeira para começar.</p>
+              <h3 className={styles.emptyTitle}>{t('dashboard.emptyTitle')}</h3>
+              <p className={styles.emptyText}>{t('dashboard.emptyText')}</p>
             </button>
           ) : null}
         </div>
@@ -197,7 +203,7 @@ export default function DashboardScreen() {
       {hasLists ? (
         <button className={styles.fab} type="button" onClick={goToCreateList}>
           <PlusIcon width="18" height="18" />
-          Criar nova lista
+          {t('dashboard.createNewList')}
         </button>
       ) : null}
 
@@ -205,15 +211,15 @@ export default function DashboardScreen() {
         <div className={styles.bottomNavInner}>
           <button className={`${styles.navItem} ${styles.navItemActive}`} type="button">
             <GridIcon className={styles.navIcon} />
-            Dashboard
+            {t('common.dashboard')}
           </button>
           <button className={styles.navItem} type="button">
             <GiftIcon className={styles.navIcon} />
-            Create
+            {t('common.create')}
           </button>
           <button className={styles.navItem} type="button">
             <UserIcon className={styles.navIcon} />
-            Profile
+            {t('common.profile')}
           </button>
         </div>
       </nav>

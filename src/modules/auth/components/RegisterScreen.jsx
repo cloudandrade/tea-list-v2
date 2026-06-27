@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { register } from '../services/authApi';
@@ -12,6 +13,7 @@ import styles from './auth.module.css';
 export default function RegisterScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { t } = useI18n();
   const { startNavigationLoading, stopNavigationLoading } = useNavigationLoading();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,7 @@ export default function RegisterScreen() {
     event.preventDefault();
 
     if (form.password !== form.confirmPassword) {
-      showToast({ type: 'error', message: 'As senhas precisam ser iguais.' });
+      showToast({ type: 'error', message: t('auth.passwordMismatch') });
       return;
     }
 
@@ -58,17 +60,17 @@ export default function RegisterScreen() {
       <section className={styles.registerMain}>
         <form className={styles.registerCard} onSubmit={handleSubmit}>
           <div className={styles.registerHeader}>
-            <h2 className={styles.registerTitle}>Criar Conta</h2>
-            <p className={styles.registerSubtitle}>Join Tea List today.</p>
+            <h2 className={styles.registerTitle}>{t('auth.createAccount')}</h2>
+            <p className={styles.registerSubtitle}>{t('auth.joinToday')}</p>
           </div>
 
           <label className={styles.field}>
-            <span className={styles.registerLabel}>Name</span>
+            <span className={styles.registerLabel}>{t('auth.name')}</span>
             <input
               className={styles.registerInput}
               name="name"
               autoComplete="name"
-              placeholder="Enter your full name"
+              placeholder={t('auth.namePlaceholder')}
               value={form.name}
               onChange={updateField}
               required
@@ -76,7 +78,7 @@ export default function RegisterScreen() {
           </label>
 
           <label className={styles.field}>
-            <span className={styles.registerLabel}>Email</span>
+            <span className={styles.registerLabel}>{t('auth.email')}</span>
             <input
               className={styles.registerInput}
               name="email"
@@ -90,14 +92,14 @@ export default function RegisterScreen() {
           </label>
 
           <label className={styles.field}>
-            <span className={styles.registerLabel}>Password</span>
+            <span className={styles.registerLabel}>{t('auth.password')}</span>
             <span className={styles.inputWrap}>
               <input
                 className={styles.registerInput}
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                placeholder="Min. 8 characters"
+                placeholder={t('auth.passwordPlaceholder')}
                 value={form.password}
                 onChange={updateField}
                 required
@@ -107,13 +109,13 @@ export default function RegisterScreen() {
           </label>
 
           <label className={styles.field}>
-            <span className={styles.registerLabel}>Confirm Password</span>
+            <span className={styles.registerLabel}>{t('auth.confirmPassword')}</span>
             <input
               className={styles.registerInput}
               name="confirmPassword"
               type="password"
               autoComplete="new-password"
-              placeholder="Repeat your password"
+              placeholder={t('auth.confirmPasswordPlaceholder')}
               value={form.confirmPassword}
               onChange={updateField}
               required
@@ -121,11 +123,11 @@ export default function RegisterScreen() {
           </label>
 
           <button className="primary-button" disabled={loading} type="submit">
-            {loading ? 'Criando...' : 'Criar Conta'}
+            {loading ? t('auth.creating') : t('auth.createAccount')}
           </button>
 
           <p className={styles.registerSwitch}>
-            Already have an account? <Link href="/">Sign In</Link>
+            {t('auth.alreadyAccount')} <Link href="/">{t('auth.signInLink')}</Link>
           </p>
 
         </form>

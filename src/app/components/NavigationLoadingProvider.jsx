@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useI18n } from './I18nProvider';
 
 const NavigationLoadingContext = createContext(null);
 
@@ -18,6 +19,7 @@ function isNavigableLink(anchor) {
 
 export function NavigationLoadingProvider({ children }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
 
   const startNavigationLoading = useCallback(() => {
@@ -76,7 +78,7 @@ export function NavigationLoadingProvider({ children }) {
         <div className="route-loading-overlay" role="status" aria-live="polite" aria-busy="true">
           <div className="route-loading-card">
             <span className="custom-loading-spinner" aria-hidden="true" />
-            <p>Carregando...</p>
+            <p>{t('common.loading')}</p>
           </div>
         </div>
       ) : null}
