@@ -1,5 +1,6 @@
 import './globals.css';
 import AppStartup from './components/AppStartup';
+import { NavigationLoadingProvider } from './components/NavigationLoadingProvider';
 import { ToastProvider } from './components/ToastProvider';
 
 export const metadata = {
@@ -16,7 +17,9 @@ export default function RootLayout({ children }) {
     <html lang="pt-BR">
       <body>
         <ToastProvider>
-          <AppStartup>{children}</AppStartup>
+          <NavigationLoadingProvider>
+            <AppStartup>{children}</AppStartup>
+          </NavigationLoadingProvider>
         </ToastProvider>
       </body>
     </html>

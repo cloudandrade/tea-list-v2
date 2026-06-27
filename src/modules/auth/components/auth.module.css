@@ -29,39 +29,18 @@
 }
 
 .brandMark {
-  position: relative;
   display: grid;
   width: 80px;
   height: 80px;
   place-items: center;
-  border-radius: 999px;
-  color: var(--color-primary);
-  background: #efe6e2;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
-.brandMark svg {
-  width: 31px;
-  height: 31px;
-}
-
-.leafBadge {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 999px;
-  color: #fff8f5;
-  background: var(--color-accent);
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-}
-
-.leafBadge svg {
-  width: 14px;
-  height: 14px;
+.brandMark img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 .brandTitle {
@@ -194,6 +173,44 @@
   width: 22px;
   height: 22px;
   color: #d9c2ba;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: #d9c2ba;
+  background: transparent;
+}
+
+.passwordToggle:hover {
+  color: var(--color-accent);
+  background: rgba(134, 69, 42, 0.08);
+}
+
+.passwordToggle svg {
+  width: 22px;
+  height: 22px;
+}
+
+.rememberLogin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.rememberLogin input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
 }
 
 .authFooter {

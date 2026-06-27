@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { register } from '../services/authApi';
 import { BackIcon, EyeIcon, GearIcon } from './icons';
@@ -11,6 +12,7 @@ import styles from './auth.module.css';
 export default function RegisterScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { startNavigationLoading, stopNavigationLoading } = useNavigationLoading();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
 
@@ -30,9 +32,11 @@ export default function RegisterScreen() {
 
     try {
       await register({ name: form.name, email: form.email, password: form.password });
+      startNavigationLoading();
       router.push('/dashboard');
       router.refresh();
     } catch (requestError) {
+      stopNavigationLoading();
       showToast({ type: 'error', message: requestError.message });
     } finally {
       setLoading(false);

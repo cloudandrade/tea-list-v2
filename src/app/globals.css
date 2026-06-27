@@ -193,8 +193,8 @@ a {
   width: min(100%, 360px);
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 32px;
+  gap: 10px;
+  padding: 28px 32px 32px;
   border: 1px solid rgba(217, 194, 186, 0.24);
   border-radius: 16px;
   background: var(--color-surface);
@@ -202,13 +202,20 @@ a {
   text-align: center;
 }
 
-.app-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(217, 194, 186, 0.45);
-  border-top-color: var(--color-primary);
-  border-radius: 999px;
-  animation: app-spin 800ms linear infinite;
+.custom-loading-spinner {
+  display: block;
+  width: 118px;
+  height: 162px;
+  background-image: url('/loading-frame-1.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  animation: custom-loading-frames 650ms steps(1, end) infinite;
+}
+
+.custom-loading-spinner-large {
+  width: 156px;
+  height: 214px;
 }
 
 .app-loading-title {
@@ -247,8 +254,61 @@ a {
   overflow-wrap: anywhere;
 }
 
-@keyframes app-spin {
-  to {
-    transform: rotate(360deg);
+.route-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(255, 248, 245, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.route-loading-card {
+  display: flex;
+  min-width: 172px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+  color: var(--color-primary);
+  background: transparent;
+}
+
+.route-loading-card p {
+  margin: -20px 0 0;
+  color: var(--color-primary);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+@keyframes custom-loading-frames {
+  0%,
+  19.99% {
+    background-image: url('/loading-frame-1.png');
+  }
+
+  20%,
+  39.99% {
+    background-image: url('/loading-frame-2.png');
+  }
+
+  40%,
+  59.99% {
+    background-image: url('/loading-frame-3.png');
+  }
+
+  60%,
+  79.99% {
+    background-image: url('/loading-frame-4.png');
+  }
+
+  80%,
+  100% {
+    background-image: url('/loading-frame-5.png');
   }
 }

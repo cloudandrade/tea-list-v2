@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { BackIcon, LogoutIcon, PlusIcon } from '@/modules/auth/components/icons';
 import { logout } from '@/modules/auth/services/authApi';
@@ -49,6 +50,7 @@ const emptyForm = {
 export default function CreateListScreen({ listId = '', mode = 'create' }) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { startNavigationLoading, stopNavigationLoading } = useNavigationLoading();
   const [form, setForm] = useState(emptyForm);
   const [initialLoading, setInitialLoading] = useState(mode === 'edit');
   const [loading, setLoading] = useState(false);
@@ -82,6 +84,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
         });
       } catch (requestError) {
         showToast({ type: 'error', message: requestError.message });
+        startNavigationLoading();
         router.replace('/dashboard');
       } finally {
         if (active) {
@@ -95,7 +98,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
     return () => {
       active = false;
     };
-  }, [isEdit, listId, router, showToast]);
+  }, [isEdit, listId, router, showToast, startNavigationLoading]);
 
   function updateField(event) {
     setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
@@ -124,6 +127,7 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
 
   async function handleLogout() {
     await logout();
+    startNavigationLoading();
     router.replace('/');
     router.refresh();
   }
@@ -134,10 +138,12 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
 
     try {
       const response = isEdit ? await updateList(listId, form) : await createList(form);
+      startNavigationLoading();
       router.push(isEdit ? `/dashboard/lists/${response.list.id}` : `/dashboard/lists/${response.list.id}/items`);
       router.refresh();
       showToast({ type: 'success', message: isEdit ? 'Lista atualizada.' : 'Lista criada.' });
     } catch (requestError) {
+      stopNavigationLoading();
       showToast({ type: 'error', message: requestError.message });
     } finally {
       setLoading(false);
@@ -155,7 +161,10 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
   return (
     <main className={styles.page}>
       <header className={styles.topBar}>
-        <button className="icon-button" type="button" onClick={() => router.push('/dashboard')} aria-label="Voltar">
+        <button className="icon-button" type="button" onClick={() => {
+          startNavigationLoading();
+          router.push('/dashboard');
+        }} aria-label="Voltar">
           <BackIcon width="22" height="22" />
         </button>
         <h1 className={styles.topTitle}>Tea List</h1>

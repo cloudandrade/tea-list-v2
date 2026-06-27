@@ -1,9 +1,11 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { getLists, getMe, logout } from '@/modules/auth/services/authApi';
-import { LeafIcon, LogoutIcon, PlusIcon, TeaCupIcon } from '@/modules/auth/components/icons';
+import { LogoutIcon, PlusIcon } from '@/modules/auth/components/icons';
 import styles from './dashboard.module.css';
 
 function GridIcon(props) {
@@ -79,6 +81,7 @@ function ListCard({ list, onManage }) {
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const { startNavigationLoading } = useNavigationLoading();
   const [user, setUser] = useState(null);
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,6 +100,7 @@ export default function DashboardScreen() {
         setUser(meResponse.user);
         setLists(listsResponse.lists);
       } catch {
+        startNavigationLoading();
         router.replace('/');
       } finally {
         if (active) {
@@ -110,22 +114,25 @@ export default function DashboardScreen() {
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [router, startNavigationLoading]);
 
   const firstName = useMemo(() => user?.name?.split(' ')[0] || 'bem-vinda', [user]);
   const hasLists = lists.length > 0;
 
   async function handleLogout() {
     await logout();
+    startNavigationLoading();
     router.replace('/');
     router.refresh();
   }
 
   function goToCreateList() {
+    startNavigationLoading();
     router.push('/dashboard/lists/new');
   }
 
   function goToManageList(listId) {
+    startNavigationLoading();
     router.push(`/dashboard/lists/${listId}`);
   }
 
@@ -144,10 +151,7 @@ export default function DashboardScreen() {
       <header className={styles.topBar}>
         <div className={styles.brandSide}>
           <span className={styles.brandMark} aria-hidden="true">
-            <TeaCupIcon />
-            <span className={styles.leafBadge}>
-              <LeafIcon />
-            </span>
+            <Image alt="" src="/tea-list-logo.png" width={34} height={34} />
           </span>
           <h1 className={styles.title}>Tea List</h1>
         </div>

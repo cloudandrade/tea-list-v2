@@ -3,19 +3,39 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { BackIcon, PencilIcon, PlusIcon } from '@/modules/auth/components/icons';
-import { deleteListItem, getList, updateListItem } from '../services/listApi';
+import { createListItem, deleteListItem, getList, updateListItem } from '../services/listApi';
+import ItemFormModal from './ItemFormModal';
 import ListBottomNav from './ListBottomNav';
 import ListDisplay from './ListDisplay';
 import styles from './lists.module.css';
 
+const paletteColors = {
+  terracotta: '#86452a',
+  olive: '#586330',
+  blue: '#7c90a0',
+  rose: '#e6a4b4',
+  gold: '#d4ad68',
+};
+
 export default function PrivateListScreen({ listId }) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { startNavigationLoading } = useNavigationLoading();
   const [list, setList] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingDeleteItem, setPendingDeleteItem] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [itemModal, setItemModal] = useState(null);
+
+  async function reloadList() {
+    const response = await getList(listId);
+    setList(response.list);
+    setItems(response.items);
+  }
 
   useEffect(() => {
     let active = true;
@@ -23,7 +43,6 @@ export default function PrivateListScreen({ listId }) {
     async function loadList() {
       try {
         const response = await getList(listId);
-
         if (!active) {
           return;
         }
@@ -31,6 +50,7 @@ export default function PrivateListScreen({ listId }) {
         setList(response.list);
         setItems(response.items);
       } catch {
+        startNavigationLoading();
         router.replace('/dashboard');
       } finally {
         if (active) {
@@ -44,12 +64,12 @@ export default function PrivateListScreen({ listId }) {
     return () => {
       active = false;
     };
-  }, [listId, router]);
+  }, [listId, router, startNavigationLoading]);
 
   async function handleUpdateItem(itemId, payload) {
     try {
-      const response = await updateListItem(listId, itemId, payload);
-      setItems((current) => current.map((item) => (item.id === itemId ? response.item : item)));
+      await updateListItem(listId, itemId, payload);
+      await reloadList();
       showToast({ type: 'success', message: 'Item atualizado.' });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
@@ -57,13 +77,37 @@ export default function PrivateListScreen({ listId }) {
     }
   }
 
-  async function handleDeleteItem(itemId) {
+  async function handleCreateItem(payload) {
     try {
-      await deleteListItem(listId, itemId);
-      setItems((current) => current.filter((item) => item.id !== itemId));
+      const response = await createListItem(listId, payload);
+      await reloadList();
+      showToast({ type: 'success', message: `${response.items?.length || 1} item(ns) adicionado(s) à lista.` });
+    } catch (requestError) {
+      showToast({ type: 'error', message: requestError.message });
+      throw requestError;
+    }
+  }
+
+  function handleRequestDeleteItem(item) {
+    setPendingDeleteItem(item);
+  }
+
+  async function handleConfirmDeleteItem() {
+    if (!pendingDeleteItem) {
+      return;
+    }
+
+    setDeleteLoading(true);
+
+    try {
+      await deleteListItem(listId, pendingDeleteItem.id);
+      await reloadList();
+      setPendingDeleteItem(null);
       showToast({ type: 'success', message: 'Item excluído.' });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -75,47 +119,92 @@ export default function PrivateListScreen({ listId }) {
     );
   }
 
+  const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
+  const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
+
   return (
     <main className={styles.page}>
       <header className={styles.topBar}>
-        <button className="icon-button" type="button" onClick={() => router.push('/dashboard')} aria-label="Voltar">
+        <button className="icon-button" type="button" onClick={() => {
+          startNavigationLoading();
+          router.push('/dashboard');
+        }} aria-label="Voltar">
           <BackIcon width="22" height="22" />
         </button>
         <h1 className={styles.topTitle}>Minha Lista</h1>
         <div className={styles.headerActions}>
-          <button className="icon-button" type="button" onClick={() => router.push(`/dashboard/lists/${listId}/edit`)} aria-label="Editar lista">
+          <button className="icon-button" type="button" onClick={() => {
+            startNavigationLoading();
+            router.push(`/dashboard/lists/${listId}/edit`);
+          }} aria-label="Editar lista">
             <PencilIcon width="21" height="21" />
           </button>
-          <button className="icon-button" type="button" onClick={() => router.push(`/dashboard/lists/${listId}/items`)} aria-label="Adicionar item">
+          <button className="icon-button" type="button" onClick={() => setItemModal({ mode: 'create', item: null })} aria-label="Adicionar item">
             <PlusIcon width="22" height="22" />
           </button>
         </div>
       </header>
 
-      <section className={styles.main}>
-        <button className="primary-button" type="button" onClick={() => router.push(`/dashboard/lists/${listId}/items`)}>
-          <PlusIcon width="18" height="18" />
-          Criar novo item
-        </button>
-      </section>
+      <div className={`${styles.managementPageSurface} ${patternClass}`} style={{ '--list-color': listColor }}>
+        <section className={styles.main}>
+          <button className="primary-button" type="button" onClick={() => setItemModal({ mode: 'create', item: null })}>
+            <PlusIcon width="18" height="18" />
+            Criar novo item
+          </button>
+        </section>
 
-      <ListDisplay
-        initialItems={items}
-        isManagement
-        list={list}
-        onDeleteItem={handleDeleteItem}
-        onUpdateItem={handleUpdateItem}
-      />
+        <ListDisplay
+          initialItems={items}
+          isManagement
+          key={items.map((item) => item.id).join('|')}
+          list={list}
+          onDeleteItem={handleRequestDeleteItem}
+          onEditItem={(item) => setItemModal({ mode: 'edit', item })}
+        />
 
-      <section className={styles.main}>
-        <div className={styles.publicLinkCard}>
-          <strong>Link público</strong>
-          <Link className={styles.publicLink} href={`/l/${list.publicHash}`} target="_blank" rel="noopener noreferrer">
-            {`Abrir visualização pública`}
-          </Link>
-          <p className={styles.itemDescription}>{`/l/${list.publicHash}`}</p>
+        <section className={styles.main}>
+          <div className={styles.publicLinkCard}>
+            <strong>Link público</strong>
+            <Link className={styles.publicLink} href={`/l/${list.publicHash}`} target="_blank" rel="noopener noreferrer">
+              {`Abrir visualização pública`}
+            </Link>
+          </div>
+        </section>
+      </div>
+
+      {itemModal ? (
+        <ItemFormModal
+          mode={itemModal.mode}
+          item={itemModal.item}
+          onClose={() => setItemModal(null)}
+          onSubmit={(payload) => (
+            itemModal.mode === 'edit'
+              ? handleUpdateItem(itemModal.item.id, payload)
+              : handleCreateItem(payload)
+          )}
+        />
+      ) : null}
+
+      {pendingDeleteItem ? (
+        <div className={styles.modalOverlay} role="presentation" onClick={() => (deleteLoading ? null : setPendingDeleteItem(null))}>
+          <section className={styles.reserveModal} role="dialog" aria-modal="true" aria-labelledby="delete-item-title" onClick={(event) => event.stopPropagation()}>
+            <div>
+              <h3 className={styles.modalTitle} id="delete-item-title">Excluir item?</h3>
+              <p className={styles.modalText}>
+                Tem certeza que deseja excluir &quot;{pendingDeleteItem.name}&quot;? Essa ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.textButton} type="button" disabled={deleteLoading} onClick={() => setPendingDeleteItem(null)}>
+                Cancelar
+              </button>
+              <button className={styles.deleteConfirmButton} type="button" disabled={deleteLoading} onClick={handleConfirmDeleteItem}>
+                {deleteLoading ? 'Excluindo...' : 'Excluir item'}
+              </button>
+            </div>
+          </section>
         </div>
-      </section>
+      ) : null}
 
       <ListBottomNav active="dashboard" />
     </main>

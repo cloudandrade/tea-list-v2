@@ -47,7 +47,7 @@ export default function AppStartup({ children }) {
     return (
       <main className="app-loading-screen" aria-live="polite" aria-busy="true">
         <div className="app-loading-card">
-          <span className="app-spinner" aria-hidden="true" />
+          <span className="custom-loading-spinner custom-loading-spinner-large" aria-hidden="true" />
           <p className="app-loading-title">Preparando Tea List</p>
           <p className="app-loading-text">Verificando conexão com o MongoDB...</p>
         </div>

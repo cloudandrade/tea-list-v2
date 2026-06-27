@@ -8,6 +8,7 @@ export function TeaCupIcon(props) {
         strokeWidth="2.4"
         strokeLinejoin="round"
       />
+      <path d="M12 13.2 15 10.7l3 2.5V19h-6v-5.8Z" fill="currentColor" />
       <path
         d="M21 10h2.5a3.5 3.5 0 1 1 0 7H21"
         fill="none"
@@ -24,12 +25,8 @@ export function LeafIcon(props) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
       <path
-        d="M19.5 4.5c-6.8.2-11.2 3.4-13.1 9.5 3.1.7 8.1-.2 10.6-4.7-1.7 4-4.4 6.8-8.2 8.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M12 20.3 4.8 13.1c-2.2-2.2-2.2-5.6-.1-7.7 1.8-1.8 4.7-1.8 6.5 0l.8.8.8-.8c1.8-1.8 4.7-1.8 6.5 0 2.1 2.1 2.1 5.5-.1 7.7L12 20.3Z"
+        fill="currentColor"
       />
     </svg>
   );

@@ -25,38 +25,18 @@
 }
 
 .brandMark {
-  position: relative;
   display: grid;
   width: 34px;
   height: 34px;
   place-items: center;
-  border-radius: 999px;
-  color: var(--color-primary);
-  background: #efe6e2;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
-.brandMark svg {
-  width: 17px;
-  height: 17px;
-}
-
-.leafBadge {
-  position: absolute;
-  right: -3px;
-  bottom: -3px;
-  display: grid;
-  width: 14px;
-  height: 14px;
-  place-items: center;
-  border-radius: 999px;
-  color: #fff8f5;
-  background: var(--color-accent);
-}
-
-.leafBadge svg {
-  width: 9px;
-  height: 9px;
+.brandMark img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .title {

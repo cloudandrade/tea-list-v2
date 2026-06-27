@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { useToast } from '@/app/components/ToastProvider';
+import { PencilIcon } from '@/modules/auth/components/icons';
 import { reservePublicItem } from '../services/listApi';
 import styles from './lists.module.css';
 
@@ -31,6 +32,14 @@ const paletteColors = {
   rose: '#e6a4b4',
   gold: '#d4ad68',
 };
+
+function TrashIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path d="M5 7h14M10 11v6m4-6v6M8 7l1-3h6l1 3m-9 0 1 13h8l1-13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function ReserveForm({ publicHash, item, onReserved }) {
   const { showToast } = useToast();
@@ -106,89 +115,35 @@ function ReserveForm({ publicHash, item, onReserved }) {
   );
 }
 
-function ManagementActions({ item, onDeleteItem, onUpdateItem }) {
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    name: item.name,
-    price: String(item.price || ''),
-    quantity: item.quantity,
-    description: item.description || '',
-    imageUrl: item.imageUrl || '',
-  });
-
-  function updateField(event) {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setSaving(true);
-
-    try {
-      await onUpdateItem(item.id, {
-        ...form,
-        price: Number(String(form.price).replace(',', '.')) || 0,
-        quantity: Math.max(Number(form.quantity || 1), 1),
-      });
-      setEditing(false);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (!editing) {
-    return (
-      <div className={styles.managementActions}>
-        <button className={styles.textButton} type="button" onClick={() => setEditing(true)}>
-          Editar
-        </button>
-        <button className={styles.dangerButton} type="button" onClick={() => onDeleteItem(item.id)}>
-          Excluir
-        </button>
-      </div>
-    );
-  }
-
+function ManagementActions({ item, onDeleteItem, onEditItem }) {
   return (
-    <form className={styles.managementForm} onSubmit={handleSubmit}>
-      <input className={styles.reserveInput} name="name" value={form.name} onChange={updateField} required />
-      <input className={styles.reserveInput} name="price" value={form.price} onChange={updateField} placeholder="Preço" />
-      <input
-        className={styles.reserveInput}
-        min="1"
-        name="quantity"
-        type="number"
-        value={form.quantity}
-        onChange={updateField}
-      />
-      <textarea className={styles.reserveInput} name="description" rows={3} value={form.description} onChange={updateField} />
-      <input className={styles.reserveInput} name="imageUrl" value={form.imageUrl} onChange={updateField} placeholder="URL da imagem" />
-      <div className={styles.managementActions}>
-        <button className={styles.textButton} disabled={saving} type="submit">
-          {saving ? 'Salvando...' : 'Salvar'}
-        </button>
-        <button className={styles.dangerButton} type="button" onClick={() => setEditing(false)}>
-          Cancelar
-        </button>
-      </div>
-    </form>
+    <div className={styles.managementActions}>
+      <button className={styles.managementIconButton} type="button" onClick={() => onEditItem(item)} aria-label={`Editar ${item.name}`}>
+        <PencilIcon />
+      </button>
+      <button className={`${styles.managementIconButton} ${styles.managementIconDanger}`} type="button" onClick={() => onDeleteItem(item)} aria-label={`Excluir ${item.name}`}>
+        <TrashIcon />
+      </button>
+    </div>
   );
 }
 
-function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onUpdateItem }) {
+function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onEditItem }) {
   const compact = displayMode === 'compact';
   const isPublic = Boolean(publicHash);
+  const usesVisualCard = isPublic || isManagement;
   const isPublicReserved = isPublic && item.isReserved;
   const giftedBy = item.reservations?.[0]?.guestName || 'convidado';
-  const showImage = isPublic || !compact || isManagement;
-  const showDescription = isPublic || (!compact && item.description);
+  const showImage = usesVisualCard || !compact;
+  const showDescription = usesVisualCard || (!compact && item.description);
+  const hasPrice = Number(item.price || 0) > 0;
+  const showMeta = hasPrice || !usesVisualCard || isPublicReserved || publicHash;
 
   return (
-    <article className={`${styles.itemCard} ${isPublic ? styles.publicItemCard : ''} ${isPublicReserved ? styles.publicItemReserved : ''}`}>
+    <article className={`${styles.itemCard} ${usesVisualCard ? styles.publicItemCard : ''} ${isManagement ? styles.managementItemCard : ''} ${isPublicReserved ? styles.publicItemReserved : ''}`}>
       {showImage ? (
         <div className={styles.itemImage}>
-          {isPublic ? <span className={styles.itemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span> : null}
+          {usesVisualCard ? <span className={styles.itemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span> : null}
           {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 320px" src={item.imageUrl} unoptimized /> : null}
           {isPublicReserved ? (
             <div className={styles.reservedImageOverlay}>
@@ -202,23 +157,25 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
       ) : null}
       <h3 className={styles.itemName}>{item.name}</h3>
       {showDescription && item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
-      <div className={`${styles.itemMeta} ${isPublic ? styles.publicItemMeta : ''}`}>
-        <span>{formatCurrency(item.price)}</span>
-        {!isPublic ? (
-          <span>
-            {item.availableQuantity} de {item.quantity} disponível
-          </span>
-        ) : null}
-        {isPublicReserved ? (
-          <span className={styles.giftedBy}>
-            <span aria-hidden="true">♙</span>
-            Presenteado por {giftedBy}
-          </span>
-        ) : null}
-        {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
-      </div>
+      {showMeta ? (
+        <div className={`${styles.itemMeta} ${usesVisualCard ? styles.publicItemMeta : ''}`}>
+          {hasPrice ? <span>{formatCurrency(item.price)}</span> : <span aria-hidden="true" />}
+          {!usesVisualCard ? (
+            <span>
+              {item.availableQuantity} de {item.quantity} disponível
+            </span>
+          ) : null}
+          {isPublicReserved ? (
+            <span className={styles.giftedBy}>
+              <span aria-hidden="true">♙</span>
+              Presenteado por {giftedBy}
+            </span>
+          ) : null}
+          {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
+        </div>
+      ) : null}
       {isManagement ? (
-        <ManagementActions item={item} onDeleteItem={onDeleteItem} onUpdateItem={onUpdateItem} />
+        <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
       ) : null}
     </article>
   );
@@ -230,7 +187,7 @@ export default function ListDisplay({
   publicHash = '',
   isManagement = false,
   onDeleteItem,
-  onUpdateItem,
+  onEditItem,
 }) {
   const [items, setItems] = useState(initialItems);
   const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
@@ -239,11 +196,15 @@ export default function ListDisplay({
   const isBlocksMode = list.displayMode === 'blocks';
   const mainClass = isPublic
     ? `${styles.main} ${styles.publicMain}`
+    : isManagement
+      ? `${styles.main} ${styles.managementMain}`
     : isBlocksMode
-    ? `${styles.main} ${styles.mainBlocks} ${styles.listThemeSurface} ${patternClass}`
-    : `${styles.main} ${styles.listThemeSurface} ${patternClass}`;
+      ? `${styles.main} ${styles.mainBlocks} ${styles.listThemeSurface} ${patternClass}`
+      : `${styles.main} ${styles.listThemeSurface} ${patternClass}`;
   const gridClass = isPublic
     ? `${styles.itemsGrid} ${styles.publicItemsGrid}`
+    : isManagement
+      ? `${styles.itemsGrid} ${styles.publicItemsGrid} ${styles.managementItemsGrid}`
     : isBlocksMode
       ? `${styles.itemsGrid} ${styles.itemsGridBlocks}`
       : styles.itemsGrid;
@@ -285,7 +246,7 @@ export default function ListDisplay({
                 publicHash={publicHash}
                 isManagement={isManagement}
                 onDeleteItem={onDeleteItem}
-                onUpdateItem={onUpdateItem}
+                onEditItem={onEditItem}
                 onReserved={updateReservedItem}
               />
             ))}

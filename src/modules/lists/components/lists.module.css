@@ -12,6 +12,13 @@
   background-color: #fff8f5;
 }
 
+.managementPageSurface {
+  min-height: calc(100vh - 63px);
+  min-height: calc(100dvh - 63px);
+  padding-bottom: 96px;
+  background-color: #fff8f5;
+}
+
 .topBar {
   position: sticky;
   top: 0;
@@ -46,6 +53,10 @@
 
 .mainBlocks {
   width: min(100%, 1480px);
+}
+
+.managementMain {
+  width: min(100%, 1528px);
 }
 
 .publicMain {
@@ -493,6 +504,33 @@
   border-top: 1px solid rgba(217, 194, 186, 0.28);
 }
 
+.publicItemCard .managementActions {
+  margin: 0 24px 24px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.managementIconButton {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: var(--list-color, var(--color-accent));
+  background: rgba(255, 248, 245, 0.92);
+  box-shadow: 0 6px 14px rgba(30, 27, 24, 0.08);
+}
+
+.managementIconButton svg {
+  width: 17px;
+  height: 17px;
+}
+
+.managementIconDanger {
+  color: #8f2f22;
+}
+
 .managementForm {
   display: grid;
   gap: 10px;
@@ -671,6 +709,10 @@
   gap: 24px;
 }
 
+.managementItemsGrid {
+  padding-bottom: 8px;
+}
+
 .itemsGridBlocks {
   grid-template-columns: minmax(0, min(100%, 360px));
   justify-content: center;
@@ -724,6 +766,10 @@
   border-radius: 12px;
   background: #f4eae0;
   box-shadow: none;
+}
+
+.managementItemCard {
+  box-shadow: 0 6px 18px rgba(30, 27, 24, 0.04);
 }
 
 .publicItemReserved {
@@ -929,6 +975,77 @@
   box-shadow: 0 22px 60px rgba(30, 27, 24, 0.18);
 }
 
+.itemFormModal {
+  width: min(100%, 860px);
+  max-height: min(92vh, 760px);
+  overflow: auto;
+}
+
+.itemFormGrid {
+  display: grid;
+  gap: 24px;
+}
+
+.itemFormFields {
+  display: grid;
+  gap: 18px;
+}
+
+.itemFormImagePanel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.itemFormImageTitle {
+  margin: 0;
+  color: var(--color-primary);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.itemFormActions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  justify-content: stretch;
+}
+
+.itemFormPrimaryButton,
+.itemFormSecondaryButton {
+  display: inline-flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.itemFormPrimaryButton {
+  border: 0;
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow: var(--shadow-button);
+}
+
+.itemFormSecondaryButton {
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  background: transparent;
+}
+
+.itemFormPrimaryButton:disabled,
+.itemFormSecondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 .modalTitle {
   margin: 0 0 4px;
   color: var(--list-color, var(--color-primary));
@@ -948,6 +1065,25 @@
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.deleteConfirmButton {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: #8f2f22;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.deleteConfirmButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .reserveForm {
@@ -986,6 +1122,11 @@
 @media (min-width: 820px) {
   .stackTwoColumns {
     grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    align-items: start;
+  }
+
+  .itemFormGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
     align-items: start;
   }
 
