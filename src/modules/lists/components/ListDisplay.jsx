@@ -16,7 +16,12 @@ function makeCoverBackground(imageUrl) {
   }
 
   const escapedUrl = String(imageUrl).replaceAll('"', '\\"');
-  return { backgroundImage: `url("${escapedUrl}")` };
+  return {
+    backgroundImage: `url("${escapedUrl}")`,
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'cover',
+  };
 }
 
 const paletteColors = {
@@ -30,6 +35,7 @@ const paletteColors = {
 function ReserveForm({ publicHash, item, onReserved }) {
   const { showToast } = useToast();
   const [form, setForm] = useState({ guestName: '', guestPhone: '' });
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function updateField(event) {
@@ -45,6 +51,7 @@ function ReserveForm({ publicHash, item, onReserved }) {
       onReserved(response.item);
       showToast({ type: 'success', message: 'Item reservado com sucesso.' });
       setForm({ guestName: '', guestPhone: '' });
+      setOpen(false);
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
     } finally {
@@ -57,27 +64,45 @@ function ReserveForm({ publicHash, item, onReserved }) {
   }
 
   return (
-    <form className={styles.reserveForm} onSubmit={handleSubmit}>
-      <input
-        className={styles.reserveInput}
-        name="guestName"
-        placeholder="Seu nome"
-        value={form.guestName}
-        onChange={updateField}
-        required
-      />
-      <input
-        className={styles.reserveInput}
-        name="guestPhone"
-        placeholder="Telefone"
-        value={form.guestPhone}
-        onChange={updateField}
-        required
-      />
-      <button className="primary-button" disabled={loading} type="submit">
-        {loading ? 'Reservando...' : 'Reservar'}
+    <>
+      <button className={styles.reserveButton} type="button" onClick={() => setOpen(true)}>
+        Reservar
       </button>
-    </form>
+      {open ? (
+        <div className={styles.modalOverlay} role="presentation" onClick={() => setOpen(false)}>
+          <form className={styles.reserveModal} onSubmit={handleSubmit} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <div>
+              <h3 className={styles.modalTitle}>Reservar item</h3>
+              <p className={styles.modalText}>{item.name}</p>
+            </div>
+            <input
+              className={styles.reserveInput}
+              name="guestName"
+              placeholder="Seu nome"
+              value={form.guestName}
+              onChange={updateField}
+              required
+            />
+            <input
+              className={styles.reserveInput}
+              name="guestPhone"
+              placeholder="Telefone"
+              value={form.guestPhone}
+              onChange={updateField}
+              required
+            />
+            <div className={styles.modalActions}>
+              <button className={styles.textButton} type="button" onClick={() => setOpen(false)}>
+                Cancelar
+              </button>
+              <button className={styles.reserveButton} disabled={loading} type="submit">
+                {loading ? 'Reservando...' : 'Confirmar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -151,26 +176,47 @@ function ManagementActions({ item, onDeleteItem, onUpdateItem }) {
   );
 }
 
-function ItemCard({ item, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onUpdateItem }) {
+function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onUpdateItem }) {
   const compact = displayMode === 'compact';
-  const showImage = !compact || isManagement;
+  const isPublic = Boolean(publicHash);
+  const isPublicReserved = isPublic && item.isReserved;
+  const giftedBy = item.reservations?.[0]?.guestName || 'convidado';
+  const showImage = isPublic || !compact || isManagement;
+  const showDescription = isPublic || (!compact && item.description);
 
   return (
-    <article className={styles.itemCard}>
+    <article className={`${styles.itemCard} ${isPublic ? styles.publicItemCard : ''} ${isPublicReserved ? styles.publicItemReserved : ''}`}>
       {showImage ? (
         <div className={styles.itemImage}>
+          {isPublic ? <span className={styles.itemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span> : null}
           {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 320px" src={item.imageUrl} unoptimized /> : null}
+          {isPublicReserved ? (
+            <div className={styles.reservedImageOverlay}>
+              <span className={styles.reservedPill}>
+                <span aria-hidden="true">✓</span>
+                Reservado
+              </span>
+            </div>
+          ) : null}
         </div>
       ) : null}
       <h3 className={styles.itemName}>{item.name}</h3>
-      {!compact && item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
-      <div className={styles.itemMeta}>
+      {showDescription && item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
+      <div className={`${styles.itemMeta} ${isPublic ? styles.publicItemMeta : ''}`}>
         <span>{formatCurrency(item.price)}</span>
-        <span>
-          {item.availableQuantity} de {item.quantity} disponível
-        </span>
+        {!isPublic ? (
+          <span>
+            {item.availableQuantity} de {item.quantity} disponível
+          </span>
+        ) : null}
+        {isPublicReserved ? (
+          <span className={styles.giftedBy}>
+            <span aria-hidden="true">♙</span>
+            Presenteado por {giftedBy}
+          </span>
+        ) : null}
+        {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
       </div>
-      {publicHash ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
       {isManagement ? (
         <ManagementActions item={item} onDeleteItem={onDeleteItem} onUpdateItem={onUpdateItem} />
       ) : null}
@@ -187,16 +233,27 @@ export default function ListDisplay({
   onUpdateItem,
 }) {
   const [items, setItems] = useState(initialItems);
-  const gridClass = list.displayMode === 'blocks' ? `${styles.itemsGrid} ${styles.itemsGridBlocks}` : styles.itemsGrid;
   const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
   const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
+  const isPublic = Boolean(publicHash);
+  const isBlocksMode = list.displayMode === 'blocks';
+  const mainClass = isPublic
+    ? `${styles.main} ${styles.publicMain}`
+    : isBlocksMode
+    ? `${styles.main} ${styles.mainBlocks} ${styles.listThemeSurface} ${patternClass}`
+    : `${styles.main} ${styles.listThemeSurface} ${patternClass}`;
+  const gridClass = isPublic
+    ? `${styles.itemsGrid} ${styles.publicItemsGrid}`
+    : isBlocksMode
+      ? `${styles.itemsGrid} ${styles.itemsGridBlocks}`
+      : styles.itemsGrid;
 
   function updateReservedItem(updatedItem) {
     setItems((current) => current.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
   }
 
   return (
-    <section className={`${styles.main} ${styles.listThemeSurface} ${patternClass}`} style={{ '--list-color': listColor }}>
+    <section className={mainClass} style={{ '--list-color': listColor }}>
       <div className={styles.stack}>
         <header className={styles.listHero}>
           <div
@@ -219,10 +276,11 @@ export default function ListDisplay({
 
         {items.length ? (
           <div className={gridClass}>
-            {items.map((item) => (
+            {items.map((item, itemIndex) => (
               <ItemCard
                 displayMode={list.displayMode}
                 item={item}
+                itemIndex={itemIndex}
                 key={item.id}
                 publicHash={publicHash}
                 isManagement={isManagement}

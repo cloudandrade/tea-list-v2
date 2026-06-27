@@ -50,6 +50,12 @@ export async function createGiftItem({ listId, userId, name, price, quantity, de
   return toGiftItem(item);
 }
 
+export async function createGiftItems(items) {
+  await connectMongo();
+  const createdItems = await GiftItemModel.insertMany(items);
+  return createdItems.map(toGiftItem);
+}
+
 export async function listGiftItemsByList(listId) {
   await connectMongo();
   const items = await GiftItemModel.find({ listId }).sort({ createdAt: 1 }).lean();

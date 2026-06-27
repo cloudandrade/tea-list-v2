@@ -44,5 +44,5 @@ export async function POST(request, { params }) {
     return json({ error: result.message }, { status: result.status });
   }
 
-  return json({ item: result.item, counters: result.counters }, { status: 201 });
+  return json({ item: result.item, items: result.items, counters: result.counters }, { status: 201 });
 }

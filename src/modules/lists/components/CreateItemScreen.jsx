@@ -102,9 +102,9 @@ export default function CreateItemScreen({ listId }) {
         ...form,
         price: Number(String(form.price).replace(',', '.')) || 0,
       });
-      setItems((current) => [...current, response.item]);
+      setItems((current) => [...current, ...(response.items || [response.item])]);
       setForm(initialForm);
-      showToast({ type: 'success', message: 'Item adicionado à lista.' });
+      showToast({ type: 'success', message: `${response.items?.length || 1} item(ns) adicionado(s) à lista.` });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
     } finally {

@@ -6,6 +6,14 @@ import { getPublicList } from '../services/listApi';
 import ListDisplay from './ListDisplay';
 import styles from './lists.module.css';
 
+const paletteColors = {
+  terracotta: '#86452a',
+  olive: '#586330',
+  blue: '#7c90a0',
+  rose: '#e6a4b4',
+  gold: '#d4ad68',
+};
+
 export default function PublicListScreen({ publicHash }) {
   const { showToast } = useToast();
   const [list, setList] = useState(null);
@@ -64,13 +72,11 @@ export default function PublicListScreen({ publicHash }) {
     );
   }
 
+  const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
+  const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
+
   return (
-    <main className={styles.page}>
-      <header className={styles.topBar}>
-        <span />
-        <h1 className={styles.topTitle}>Tea List</h1>
-        <span />
-      </header>
+    <main className={`${styles.page} ${styles.publicPage} ${patternClass}`} style={{ '--list-color': listColor }}>
       <ListDisplay initialItems={items} list={list} publicHash={publicHash} />
     </main>
   );
