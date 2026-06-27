@@ -37,6 +37,13 @@
   padding: 32px 16px;
 }
 
+.listThemeSurface {
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--list-color) 16%, transparent) 0 12%, transparent 13%),
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 10%, #fff8f5), #fff8f5);
+}
+
 .stack {
   display: grid;
   gap: 24px;
@@ -435,6 +442,32 @@
   background: transparent;
 }
 
+.publicLinkCard {
+  display: grid;
+  gap: 8px;
+  padding: 28px;
+  border: 2px dashed var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+  text-align: center;
+}
+
+.publicLink {
+  width: fit-content;
+  margin: 0 auto;
+  padding: 10px 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--color-accent);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(134, 69, 42, 0.18);
+}
+
+.publicLink:hover {
+  filter: brightness(0.96);
+}
+
 .managementActions {
   display: flex;
   align-items: center;
@@ -544,6 +577,16 @@
     linear-gradient(135deg, color-mix(in srgb, var(--list-color) 18%, #fff8f5), #fff8f5);
 }
 
+.listPatternplain {
+  background:
+    radial-gradient(circle at 78% 24%, color-mix(in srgb, var(--list-color) 34%, transparent) 0 10%, transparent 11%),
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 18%, #fff8f5), #fff8f5);
+}
+
+.listHero .sectionTitle {
+  color: var(--list-color);
+}
+
 .listHeroCard {
   display: grid;
   width: min(100%, 560px);
@@ -621,7 +664,10 @@
 }
 
 .itemImage {
+  display: block;
+  position: relative;
   min-height: 170px;
+  aspect-ratio: 4 / 3;
   border-radius: 10px;
   background:
     radial-gradient(circle at 35% 44%, rgba(255, 248, 245, 0.8) 0 14%, transparent 15%),
@@ -629,6 +675,11 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  overflow: hidden;
+}
+
+.itemImage img {
+  object-fit: cover;
 }
 
 .itemName {

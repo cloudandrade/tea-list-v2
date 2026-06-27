@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { useToast } from '@/app/components/ToastProvider';
 import { reservePublicItem } from '../services/listApi';
@@ -7,6 +8,15 @@ import styles from './lists.module.css';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value || 0));
+}
+
+function makeCoverBackground(imageUrl) {
+  if (!imageUrl) {
+    return null;
+  }
+
+  const escapedUrl = String(imageUrl).replaceAll('"', '\\"');
+  return { backgroundImage: `url("${escapedUrl}")` };
 }
 
 const paletteColors = {
@@ -143,10 +153,15 @@ function ManagementActions({ item, onDeleteItem, onUpdateItem }) {
 
 function ItemCard({ item, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onUpdateItem }) {
   const compact = displayMode === 'compact';
+  const showImage = !compact || isManagement;
 
   return (
     <article className={styles.itemCard}>
-      {!compact ? <div className={styles.itemImage} style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : null} /> : null}
+      {showImage ? (
+        <div className={styles.itemImage}>
+          {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 320px" src={item.imageUrl} unoptimized /> : null}
+        </div>
+      ) : null}
       <h3 className={styles.itemName}>{item.name}</h3>
       {!compact && item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
       <div className={styles.itemMeta}>
@@ -174,18 +189,19 @@ export default function ListDisplay({
   const [items, setItems] = useState(initialItems);
   const gridClass = list.displayMode === 'blocks' ? `${styles.itemsGrid} ${styles.itemsGridBlocks}` : styles.itemsGrid;
   const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
+  const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
 
   function updateReservedItem(updatedItem) {
     setItems((current) => current.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
   }
 
   return (
-    <section className={styles.main}>
+    <section className={`${styles.main} ${styles.listThemeSurface} ${patternClass}`} style={{ '--list-color': listColor }}>
       <div className={styles.stack}>
-        <header className={styles.listHero} style={{ '--list-color': listColor }}>
+        <header className={styles.listHero}>
           <div
-            className={`${styles.listCover} ${styles[`listPattern${list.backgroundPattern}`] || ''}`}
-            style={list.coverImageUrl ? { backgroundImage: `url(${list.coverImageUrl})` } : null}
+            className={`${styles.listCover} ${patternClass}`}
+            style={makeCoverBackground(list.coverImageUrl)}
           >
             <div className={styles.listHeroCard}>
               <span className={styles.publicBadge}>{list.type}</span>

@@ -1,5 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
+const MODEL_NAME = 'GiftItemV2';
+
 const reservationSchema = new Schema(
   {
     guestName: {
@@ -58,7 +60,6 @@ const giftItemSchema = new Schema(
     imageUrl: {
       type: String,
       default: '',
-      trim: true,
     },
     reservations: {
       type: [reservationSchema],
@@ -70,5 +71,8 @@ const giftItemSchema = new Schema(
 
 giftItemSchema.index({ listId: 1, createdAt: 1 });
 
-export const GiftItemModel =
-  mongoose.models.GiftItemV2 || mongoose.model('GiftItemV2', giftItemSchema, 'gift-items-v2');
+if (mongoose.models[MODEL_NAME]) {
+  mongoose.deleteModel(MODEL_NAME);
+}
+
+export const GiftItemModel = mongoose.model(MODEL_NAME, giftItemSchema, 'gift-items-v2');

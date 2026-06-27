@@ -18,7 +18,6 @@ const giftListSchema = new Schema(
     subtitle: {
       type: String,
       default: '',
-      trim: true,
     },
     type: {
       type: String,
@@ -28,7 +27,6 @@ const giftListSchema = new Schema(
     message: {
       type: String,
       default: '',
-      trim: true,
     },
     displayMode: {
       type: String,

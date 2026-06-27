@@ -17,6 +17,15 @@ const initialForm = {
   imageUrl: '',
 };
 
+function makeImageBackground(imageUrl) {
+  if (!imageUrl) {
+    return null;
+  }
+
+  const escapedUrl = String(imageUrl).replaceAll('"', '\\"');
+  return { backgroundImage: `url("${escapedUrl}")` };
+}
+
 export default function CreateItemScreen({ listId }) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -224,7 +233,7 @@ export default function CreateItemScreen({ listId }) {
             <h2 className={styles.sectionTitle}>Imagem do Item</h2>
             <label
               className={`${styles.itemUpload} ${form.imageUrl ? styles.itemUploadWithImage : ''}`}
-              style={form.imageUrl ? { backgroundImage: `url(${form.imageUrl})` } : null}
+              style={makeImageBackground(form.imageUrl)}
             >
               <input className={styles.fileInput} type="file" accept="image/*" onChange={handleItemImageChange} />
               <div>

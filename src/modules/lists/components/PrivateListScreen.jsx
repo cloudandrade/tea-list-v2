@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/app/components/ToastProvider';
@@ -107,8 +108,11 @@ export default function PrivateListScreen({ listId }) {
       />
 
       <section className={styles.main}>
-        <div className={styles.emptyState}>
+        <div className={styles.publicLinkCard}>
           <strong>Link público</strong>
+          <Link className={styles.publicLink} href={`/l/${list.publicHash}`} target="_blank" rel="noopener noreferrer">
+            {`Abrir visualização pública`}
+          </Link>
           <p className={styles.itemDescription}>{`/l/${list.publicHash}`}</p>
         </div>
       </section>

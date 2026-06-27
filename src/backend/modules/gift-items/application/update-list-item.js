@@ -27,7 +27,7 @@ export async function updateListItem({ listId, itemId, userId, input }) {
       price: Number(input?.price || 0),
       quantity: Math.max(Number(input?.quantity || 1), 1),
       description: normalizeText(input?.description),
-      imageUrl: normalizeText(input?.imageUrl),
+      imageUrl: String(input?.imageUrl || ''),
     },
   });
 
