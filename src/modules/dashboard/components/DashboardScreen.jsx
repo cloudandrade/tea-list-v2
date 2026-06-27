@@ -32,45 +32,47 @@ function UserIcon(props) {
   );
 }
 
-function ListCard({ list, onManage }) {
-  const progress = list.totalItems ? Math.min((list.reservedItems / list.totalItems) * 100, 100) : 0;
+const paletteColors = {
+  terracotta: '#86452a',
+  olive: '#586330',
+  blue: '#7c90a0',
+  rose: '#e6a4b4',
+  gold: '#d4ad68',
+};
 
-  if (list.featured) {
-    return (
-      <article className={`${styles.card} ${styles.featured}`}>
-        <div className={styles.featuredMedia} aria-hidden="true" />
-        <div className={styles.cardBody}>
-          <p className={styles.type}>{list.type}</p>
-          <h3 className={styles.cardTitle}>{list.title}</h3>
-          <div className={styles.metaRow}>
-            <span className={styles.avatarStack}>
-              <span className={styles.avatar}>♧</span>
-              <span className={styles.avatar}>♧</span>
-            </span>
-            <span>{list.reservedItems} itens reservados</span>
-          </div>
-          <button className="primary-button" type="button" onClick={() => onManage(list.id)}>
-            Gerenciar Lista
-          </button>
-        </div>
-      </article>
-    );
+function makeCoverBackground(imageUrl, color) {
+  if (!imageUrl) {
+    return {
+      backgroundImage: `radial-gradient(circle at 22% 62%, #fff8f5 0 7%, transparent 8%), linear-gradient(135deg, ${color}, #f4eae0)`,
+    };
   }
 
+  const escapedUrl = String(imageUrl).replaceAll('"', '\\"');
+  return { backgroundImage: `url("${escapedUrl}")` };
+}
+
+function ListCard({ list, onManage }) {
+  const progress = list.totalItems ? Math.min((list.reservedItems / list.totalItems) * 100, 100) : 0;
+  const themeColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
+
   return (
-    <article className={`${styles.card} ${styles.compactCard}`}>
-      {list.theme === 'baby' ? <div className={styles.babyMedia} aria-hidden="true" /> : null}
-      <p className={styles.type}>{list.type}</p>
-      <h3 className={styles.cardTitle}>{list.title}</h3>
-      <p className={styles.progressText}>
-        {list.reservedItems} de {list.totalItems} itens adquiridos
-      </p>
-      <div className={styles.progress} aria-hidden="true">
-        <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+    <article className={styles.card} style={{ '--list-color': themeColor }}>
+      <div className={styles.cardMedia} style={makeCoverBackground(list.coverImageUrl, themeColor)} aria-hidden="true" />
+      <div className={styles.cardBody}>
+        <p className={styles.type}>{list.type}</p>
+        <h3 className={styles.cardTitle}>{list.title}</h3>
+        <div className={styles.progressBlock}>
+          <p className={styles.progressText}>
+            {list.reservedItems} de {list.totalItems} itens adquiridos
+          </p>
+          <div className={styles.progress} aria-hidden="true">
+            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+        <button className={styles.manageButton} type="button" onClick={() => onManage(list.id)}>
+          Gerenciar Lista
+        </button>
       </div>
-      <button className="secondary-button" type="button" onClick={() => onManage(list.id)}>
-        Gerenciar
-      </button>
     </article>
   );
 }
@@ -158,7 +160,9 @@ export default function DashboardScreen() {
         <div className={styles.greeting}>
           <h2 className={styles.greetingTitle}>Olá, {firstName}</h2>
           <p className={styles.greetingText}>
-            Bem-vinda de volta. Suas listas reais aparecerão aqui assim que forem criadas.
+            {hasLists
+              ? 'Bem-vindo(a) de volta. Suas listas de presentes e celebrações estão organizadas abaixo.'
+              : 'Bem-vinda de volta. Suas listas reais aparecerão aqui assim que forem criadas.'}
           </p>
         </div>
 

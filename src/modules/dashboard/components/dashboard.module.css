@@ -72,7 +72,7 @@
   display: flex;
   width: min(100%, 860px);
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 48px;
   margin: 0 auto;
   padding: 47px 16px 16px;
@@ -80,10 +80,11 @@
 
 .greeting {
   display: flex;
+  width: min(100%, 358px);
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  text-align: center;
+  text-align: left;
 }
 
 .greetingTitle {
@@ -95,7 +96,7 @@
 }
 
 .greetingText {
-  max-width: 672px;
+  max-width: 358px;
   margin: 0;
   color: var(--color-muted);
   font-size: 1.125rem;
@@ -104,58 +105,50 @@
 
 .grid {
   display: grid;
-  width: min(100%, 620px);
+  width: min(100%, 760px);
   gap: 24px;
 }
 
 .card {
+  box-sizing: border-box;
+  display: flex;
+  width: min(100%, 358px);
+  min-height: 585px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
   overflow: hidden;
-  border: 1px solid rgba(217, 194, 186, 0.16);
+  align-self: stretch;
+  border: 1px solid rgba(217, 194, 186, 0.1);
   border-radius: 12px;
-  background: var(--color-surface-warm);
-  box-shadow: var(--shadow-card);
+  background: #f4eae0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-.featuredMedia,
-.media {
-  min-height: 192px;
-  background:
-    linear-gradient(135deg, rgba(134, 69, 42, 0.7), rgba(30, 27, 24, 0.08)),
-    radial-gradient(circle at 18% 72%, #f4eae0 0 9%, transparent 10%),
-    linear-gradient(90deg, #8a5836, #d9c2ba);
-}
-
-.featuredMedia {
+.cardMedia {
+  width: 100%;
   min-height: 356px;
-  background:
-    linear-gradient(135deg, rgba(94, 48, 28, 0.82), rgba(255, 248, 245, 0.12)),
-    radial-gradient(circle at 22% 60%, #f6dfd1 0 6%, transparent 7%),
-    radial-gradient(circle at 58% 58%, #fff8f5 0 9%, transparent 10%),
-    linear-gradient(90deg, #7b421f, #e6d2c1);
-}
-
-.babyMedia {
-  min-height: 192px;
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at 28% 55%, #f0d5c2 0 10%, transparent 11%),
-    radial-gradient(circle at 65% 45%, #c98e63 0 7%, transparent 8%),
-    linear-gradient(135deg, #c6d3ba, #eff3e8);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .cardBody {
+  display: flex;
+  width: 100%;
+  min-height: 227px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
   padding: 24px;
-}
-
-.compactCard {
-  padding: 25px;
 }
 
 .type {
   margin: 0 0 8px;
-  color: var(--color-accent);
+  color: var(--list-color, var(--color-accent));
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.1em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -163,54 +156,29 @@
 
 .cardTitle {
   margin: 0 0 16px;
+  color: var(--list-color, var(--color-text));
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 1.5rem;
   font-weight: 500;
   line-height: 1.4;
 }
 
-.metaRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.progressBlock {
+  width: 100%;
   margin-bottom: 24px;
-  color: var(--color-muted);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.avatarStack {
-  display: flex;
-}
-
-.avatar {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border: 2px solid var(--color-background);
-  border-radius: 999px;
-  background: #ffdbce;
-  color: var(--color-accent);
-  font-size: 0.75rem;
-}
-
-.avatar + .avatar {
-  margin-left: -8px;
-  background: #dbe9a9;
 }
 
 .progressText {
-  margin: 0 0 16px;
+  margin: 0 0 8px;
   color: var(--color-muted);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .progress {
   height: 4px;
   overflow: hidden;
-  margin-bottom: 16px;
   border-radius: 999px;
   background: #e9e1dc;
 }
@@ -218,7 +186,22 @@
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: var(--color-accent);
+  background: var(--list-color, var(--color-accent));
+}
+
+.manageButton {
+  display: flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--list-color, var(--color-primary));
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .emptyCard {
@@ -328,9 +311,5 @@
 @media (min-width: 720px) {
   .grid:has(.card) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .featured {
-    grid-row: span 2;
   }
 }
