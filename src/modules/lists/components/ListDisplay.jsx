@@ -133,23 +133,103 @@ function ManagementActions({ item, onDeleteItem, onEditItem }) {
 
 function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isManagement, onDeleteItem, onEditItem }) {
   const { locale, t } = useI18n();
-  const compact = displayMode === 'compact';
+  const [expanded, setExpanded] = useState(itemIndex === 0);
   const isPublic = Boolean(publicHash);
-  const usesVisualCard = isPublic || isManagement;
+  const isPublicOrManagement = isPublic || isManagement;
+  const isCompact = displayMode === 'compact';
+  const isDetailed = displayMode === 'detailed';
+  const isBlocks = !isCompact && !isDetailed;
+  const usesVisualCard = isPublicOrManagement && isBlocks;
   const isPublicReserved = isPublic && item.isReserved;
+  const isManagementReserved = isManagement && item.isReserved;
+  const isReserved = isPublicReserved || isManagementReserved;
   const giftedBy = item.reservations?.[0]?.guestName || t('lists.anonymousGuest');
-  const showImage = usesVisualCard || !compact;
-  const showDescription = usesVisualCard || (!compact && item.description);
   const hasPrice = Number(item.price || 0) > 0;
-  const showMeta = hasPrice || !usesVisualCard || isPublicReserved || publicHash;
+  const showImage = usesVisualCard || (isDetailed && expanded) || (!isPublicOrManagement && !isCompact);
+  const showDescription = Boolean(
+    item.description
+    && (usesVisualCard || (isDetailed && expanded) || (!isPublicOrManagement && !isCompact)),
+  );
+
+  if (isPublicOrManagement && isCompact) {
+    return (
+      <article className={`${styles.compactItem} ${isReserved ? styles.compactItemReserved : ''}`}>
+        <div className={styles.compactItemMain}>
+          <h3 className={styles.compactItemName}>{item.name}</h3>
+          {isManagementReserved ? (
+            <span className={styles.giftedBy}>
+              <span aria-hidden="true">♙</span>
+              {t('lists.giftedBy', { name: giftedBy })}
+            </span>
+          ) : null}
+        </div>
+        <div className={styles.compactItemActions}>
+          {isManagement ? (
+            <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
+          ) : null}
+          {isPublicReserved ? <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span> : null}
+          {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
+        </div>
+      </article>
+    );
+  }
+
+  if (isPublicOrManagement && isDetailed) {
+    return (
+      <article className={`${styles.detailedItem} ${isReserved ? styles.publicItemReserved : ''}`}>
+        <button
+          className={styles.detailedItemSummary}
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          <h3 className={styles.detailedItemName}>{item.name}</h3>
+          <span className={styles.detailedItemToggle} aria-hidden="true">{expanded ? '−' : '+'}</span>
+        </button>
+        {expanded ? (
+          <div className={styles.detailedItemBody}>
+            <div className={styles.itemImage}>
+              <span className={styles.itemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span>
+              {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 320px" src={item.imageUrl} unoptimized /> : null}
+              {isReserved ? (
+                <div className={styles.reservedImageOverlay}>
+                  <span className={styles.reservedPill}>
+                    <span aria-hidden="true">✓</span>
+                    {t('lists.reserved')}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+            {item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
+            <div className={styles.detailedItemMeta}>
+              {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : <span aria-hidden="true" />}
+              {isManagementReserved ? (
+                <span className={styles.giftedBy}>
+                  <span aria-hidden="true">♙</span>
+                  {t('lists.giftedBy', { name: giftedBy })}
+                </span>
+              ) : null}
+              {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
+              {isPublicReserved ? <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span> : null}
+              {isManagement ? (
+                <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </article>
+    );
+  }
+
+  const showMeta = hasPrice || !usesVisualCard || isManagementReserved || (publicHash && !isPublicReserved);
 
   return (
-    <article className={`${styles.itemCard} ${usesVisualCard ? styles.publicItemCard : ''} ${isManagement ? styles.managementItemCard : ''} ${isPublicReserved ? styles.publicItemReserved : ''}`}>
+    <article className={`${styles.itemCard} ${usesVisualCard ? styles.publicItemCard : ''} ${isManagement ? styles.managementItemCard : ''} ${isReserved ? styles.publicItemReserved : ''}`}>
       {showImage ? (
         <div className={styles.itemImage}>
           {usesVisualCard ? <span className={styles.itemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span> : null}
           {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 320px" src={item.imageUrl} unoptimized /> : null}
-          {isPublicReserved ? (
+          {isReserved ? (
             <div className={styles.reservedImageOverlay}>
               <span className={styles.reservedPill}>
                 <span aria-hidden="true">✓</span>
@@ -160,19 +240,19 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
         </div>
       ) : null}
       <h3 className={styles.itemName}>{item.name}</h3>
-      {showDescription && item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
+      {showDescription ? <p className={styles.itemDescription}>{item.description}</p> : null}
       {showMeta ? (
         <div className={`${styles.itemMeta} ${usesVisualCard ? styles.publicItemMeta : ''}`}>
           {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : <span aria-hidden="true" />}
           {!usesVisualCard ? (
             <span>
-            {t('lists.available', { available: item.availableQuantity, total: item.quantity })}
+              {t('lists.available', { available: item.availableQuantity, total: item.quantity })}
             </span>
           ) : null}
-          {isPublicReserved ? (
+          {isManagementReserved ? (
             <span className={styles.giftedBy}>
               <span aria-hidden="true">♙</span>
-            {t('lists.giftedBy', { name: giftedBy })}
+              {t('lists.giftedBy', { name: giftedBy })}
             </span>
           ) : null}
           {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
@@ -198,7 +278,10 @@ export default function ListDisplay({
   const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
   const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
   const isPublic = Boolean(publicHash);
-  const isBlocksMode = list.displayMode === 'blocks';
+  const displayMode = list.displayMode || 'blocks';
+  const isBlocksMode = displayMode === 'blocks';
+  const isDetailedMode = displayMode === 'detailed';
+  const isCompactMode = displayMode === 'compact';
   const mainClass = isPublic
     ? `${styles.main} ${styles.publicMain}`
     : isManagement
@@ -206,13 +289,20 @@ export default function ListDisplay({
     : isBlocksMode
       ? `${styles.main} ${styles.mainBlocks} ${styles.listThemeSurface} ${patternClass}`
       : `${styles.main} ${styles.listThemeSurface} ${patternClass}`;
-  const gridClass = isPublic
-    ? `${styles.itemsGrid} ${styles.publicItemsGrid}`
-    : isManagement
-      ? `${styles.itemsGrid} ${styles.publicItemsGrid} ${styles.managementItemsGrid}`
-    : isBlocksMode
-      ? `${styles.itemsGrid} ${styles.itemsGridBlocks}`
-      : styles.itemsGrid;
+
+  let gridClass = styles.itemsGrid;
+
+  if (isPublic || isManagement) {
+    if (isBlocksMode) {
+      gridClass = `${styles.itemsGrid} ${styles.publicItemsGrid}${isManagement ? ` ${styles.managementItemsGrid}` : ''}`;
+    } else if (isDetailedMode) {
+      gridClass = `${styles.itemsGrid} ${styles.itemsGridDetailed}${isManagement ? ` ${styles.managementItemsGrid}` : ''}`;
+    } else if (isCompactMode) {
+      gridClass = `${styles.itemsGrid} ${styles.itemsGridCompact}${isManagement ? ` ${styles.managementItemsGrid}` : ''}`;
+    }
+  } else if (isBlocksMode) {
+    gridClass = `${styles.itemsGrid} ${styles.itemsGridBlocks}`;
+  }
 
   function updateReservedItem(updatedItem) {
     setItems((current) => current.map((item) => (item.id === updatedItem.id ? updatedItem : item)));
@@ -223,28 +313,37 @@ export default function ListDisplay({
       <div className={styles.stack}>
         <header className={styles.listHero}>
           <div
-            className={`${styles.listCover} ${patternClass}`}
-            style={makeCoverBackground(list.coverImageUrl)}
+            className={styles.listCover}
+            style={makeCoverBackground(list.coverImageUrl) || undefined}
           >
-            <div className={styles.listHeroCard}>
+            <div className={styles.listHeroFade} aria-hidden="true" />
+            <div className={styles.listHeroContent}>
               <span className={styles.publicBadge}>{list.type}</span>
-              <h1 className={styles.sectionTitle}>{list.title}</h1>
+              <h1 className={styles.listHeroTitle}>{list.title}</h1>
               {list.subtitle ? <p className={styles.listSubtitle}>{list.subtitle}</p> : null}
+              {list.message ? <p className={styles.listHeroMessage}>{list.message}</p> : null}
             </div>
           </div>
-          {list.message ? (
-            <div className={styles.listMessage}>
-              <span>{t('lists.guestMessage')}</span>
-              <p>{list.message}</p>
-            </div>
-          ) : null}
         </header>
+
+        <div className={styles.giftsSection}>
+          <div className={styles.giftsSectionHeading}>
+            <h2 className={styles.giftsSectionTitle}>{t('lists.giftsSection')}</h2>
+            <span className={styles.giftsSectionCount}>
+              {t(items.length === 1 ? 'lists.giftsCountOne' : 'lists.giftsCount', { count: items.length })}
+            </span>
+          </div>
+          <div className={styles.giftsDivider} aria-hidden="true">
+            <span className={styles.giftsDividerTrack} />
+            <span className={styles.giftsDividerIndicator} />
+          </div>
+        </div>
 
         {items.length ? (
           <div className={gridClass}>
             {items.map((item, itemIndex) => (
               <ItemCard
-                displayMode={list.displayMode}
+                displayMode={displayMode}
                 item={item}
                 itemIndex={itemIndex}
                 key={item.id}

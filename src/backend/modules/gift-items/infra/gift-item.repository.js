@@ -35,6 +35,17 @@ function toGiftItem(document) {
   };
 }
 
+export function toPublicGiftItem(item) {
+  if (!item) {
+    return null;
+  }
+
+  return {
+    ...item,
+    reservations: [],
+  };
+}
+
 export async function createGiftItem({ listId, userId, name, price, quantity, description, imageUrl }) {
   await connectMongo();
   const item = await GiftItemModel.create({

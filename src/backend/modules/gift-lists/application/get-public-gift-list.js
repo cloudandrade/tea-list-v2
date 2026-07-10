@@ -1,4 +1,4 @@
-import { listGiftItemsByList } from '@/backend/modules/gift-items/infra/gift-item.repository';
+import { listGiftItemsByList, toPublicGiftItem } from '@/backend/modules/gift-items/infra/gift-item.repository';
 import { findGiftListByPublicHash } from '../infra/gift-list.repository';
 
 export async function getPublicGiftList(publicHash) {
@@ -9,5 +9,5 @@ export async function getPublicGiftList(publicHash) {
   }
 
   const items = await listGiftItemsByList(list.id);
-  return { ok: true, list, items };
+  return { ok: true, list, items: items.map(toPublicGiftItem) };
 }

@@ -55,13 +55,35 @@
   width: min(100%, 1480px);
 }
 
-.managementMain {
-  width: min(100%, 1528px);
+.publicMain {
+  width: 100%;
+  max-width: none;
+  padding: 0 0 48px;
 }
 
-.publicMain {
+.managementMain {
+  width: 100%;
+  max-width: none;
+  padding: 0 0 32px;
+}
+
+.publicMain .stack,
+.managementMain .stack {
+  gap: 28px;
+}
+
+.publicMain .publicItemsGrid,
+.managementMain .publicItemsGrid,
+.publicMain .itemsGridDetailed,
+.managementMain .itemsGridDetailed,
+.publicMain .itemsGridCompact,
+.managementMain .itemsGridCompact,
+.publicMain .emptyState,
+.managementMain .emptyState {
   width: min(100%, 1528px);
-  padding: 32px 16px 48px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .listThemeSurface {
@@ -568,8 +590,8 @@
   border-top: 1px solid rgba(217, 194, 186, 0.28);
 }
 
-.publicItemCard .managementActions {
-  margin: 0 24px 24px;
+.compactItemActions .managementActions,
+.detailedItemMeta .managementActions {
   padding-top: 0;
   border-top: 0;
 }
@@ -658,25 +680,68 @@
 }
 
 .listHero {
-  display: grid;
-  gap: 16px;
+  display: block;
   text-align: center;
 }
 
 .listCover {
-  display: grid;
-  min-height: clamp(280px, 40vw, 420px);
-  place-items: end center;
+  position: relative;
+  display: flex;
+  min-height: clamp(340px, 58vw, 560px);
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
   overflow: hidden;
-  padding: 28px;
-  border: 1px solid rgba(217, 194, 186, 0.18);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 24% 72%, color-mix(in srgb, var(--list-color) 42%, transparent) 0 13%, transparent 14%),
-    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 22%, #fff8f5), #fff8f5);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: #fff8f5;
+  background-image: linear-gradient(135deg, color-mix(in srgb, var(--list-color) 18%, #fff8f5), #fff8f5);
   background-position: center;
+  background-repeat: no-repeat;
   background-size: cover;
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
+}
+
+.listHeroFade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 245, 0) 0%,
+    rgba(255, 248, 245, 0) 28%,
+    rgba(255, 248, 245, 0.35) 52%,
+    rgba(255, 248, 245, 0.78) 78%,
+    #fff8f5 100%
+  );
+}
+
+.listHeroContent {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: min(100%, 760px);
+  gap: 12px;
+  justify-items: center;
+  padding: 56px 20px 32px;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .listHeroContent {
+    padding: 72px 40px 40px;
+  }
+}
+
+.listHeroTitle {
+  margin: 0;
+  color: #1e1b18;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(2rem, 5.4vw, 2.85rem);
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .listPatterndots {
@@ -760,27 +825,26 @@
     drop-shadow(1320px 860px 0 var(--list-color));
 }
 
-.listHero .sectionTitle {
-  color: var(--list-color);
-}
-
-.listHeroCard {
-  display: grid;
-  width: min(100%, 560px);
-  gap: 10px;
-  padding: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.46);
-  border-radius: 18px;
-  background: rgba(255, 248, 245, 0.86);
-  box-shadow: 0 14px 34px rgba(30, 27, 24, 0.12);
-  backdrop-filter: blur(8px);
-}
-
 .listSubtitle {
-  max-width: 520px;
-  margin: 0 auto;
-  color: var(--color-muted);
+  max-width: 36em;
+  margin: 0;
+  color: #1e1b18;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  font-style: italic;
+  font-weight: 400;
   line-height: 1.55;
+}
+
+.listHeroMessage {
+  max-width: 38em;
+  margin: 0;
+  color: #1e1b18;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(1rem, 2.2vw, 1.125rem);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.65;
 }
 
 .listMessage {
@@ -810,15 +874,70 @@
 
 .publicBadge {
   width: fit-content;
-  margin: 0 auto;
-  padding: 5px 10px;
-  border-radius: 999px;
-  color: #fff;
-  background: var(--list-color, var(--color-accent));
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: color-mix(in srgb, var(--list-color) 72%, #1e1b18);
+  background: color-mix(in srgb, var(--list-color) 22%, #fff8f5);
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.giftsSection {
+  width: min(100%, 1528px);
+  margin: 0 auto;
+  padding: 8px 16px 4px;
+}
+
+.giftsSectionHeading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.giftsSectionTitle {
+  margin: 0;
+  color: #1e1b18;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.15rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.giftsSectionCount {
+  color: rgba(83, 67, 61, 0.72);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.giftsDivider {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 10px;
+}
+
+.giftsDividerTrack {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: rgba(217, 194, 186, 0.55);
+}
+
+.giftsDividerIndicator {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  width: 88%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--list-color, #86452a);
 }
 
 .itemsGrid {
@@ -834,6 +953,111 @@
 
 .managementItemsGrid {
   padding-bottom: 8px;
+}
+
+.itemsGridDetailed,
+.itemsGridCompact {
+  width: min(100%, 760px);
+  gap: 12px;
+}
+
+.compactItem,
+.detailedItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(217, 194, 186, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 248, 245, 0.92);
+  box-shadow: 0 4px 14px rgba(30, 27, 24, 0.04);
+}
+
+.compactItem {
+  flex-wrap: wrap;
+}
+
+.compactItemReserved,
+.detailedItem.publicItemReserved {
+  opacity: 0.92;
+}
+
+.compactItemMain {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.compactItemName,
+.detailedItemName {
+  margin: 0;
+  color: #1e1b18;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.compactItemActions,
+.detailedItemMeta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.detailedItem {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.detailedItemSummary {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.detailedItemToggle {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--list-color, var(--color-primary));
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.detailedItemBody {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+  text-align: left;
+}
+
+.detailedItemBody .itemImage {
+  min-height: 180px;
+  border-radius: 10px;
+}
+
+.detailedItemMeta {
+  width: 100%;
+  justify-content: space-between;
 }
 
 .itemsGridBlocks {
@@ -945,7 +1169,7 @@
   border-radius: 10px;
   background:
     radial-gradient(circle at 35% 44%, rgba(255, 248, 245, 0.8) 0 14%, transparent 15%),
-    linear-gradient(135deg, #c6d3ba, #efe6e2);
+    linear-gradient(135deg, color-mix(in srgb, var(--list-color) 34%, #efe6e2), #fff8f5);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;

@@ -1,5 +1,5 @@
 import { findGiftListByPublicHash, updateGiftListCounters } from '@/backend/modules/gift-lists/infra/gift-list.repository';
-import { reserveGiftItem, summarizeGiftItemsByList } from '../infra/gift-item.repository';
+import { reserveGiftItem, summarizeGiftItemsByList, toPublicGiftItem } from '../infra/gift-item.repository';
 
 function normalizeText(value) {
   return String(value || '').trim();
@@ -33,5 +33,5 @@ export async function reservePublicItem({ publicHash, itemId, input }) {
   const counters = await summarizeGiftItemsByList(list.id);
   await updateGiftListCounters(list.id, counters);
 
-  return { ok: true, item: reservation.item, counters };
+  return { ok: true, item: toPublicGiftItem(reservation.item), counters };
 }
