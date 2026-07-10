@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { useI18n } from '@/app/components/I18nProvider';
 import { useToast } from '@/app/components/ToastProvider';
-import { PencilIcon, TrashIcon } from '@/modules/auth/components/icons';
+import { PencilIcon, TrashIcon, ChevronDownIcon } from '@/modules/auth/components/icons';
 import { reservePublicItem } from '../services/listApi';
 import styles from './lists.module.css';
 
@@ -41,6 +41,28 @@ const paletteColors = {
   mint: '#6fa18a',
 };
 
+function formatPhoneMask(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 11);
+
+  if (digits.length === 0) {
+    return '';
+  }
+
+  if (digits.length <= 2) {
+    return `(${digits}`;
+  }
+
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 function ReserveForm({ publicHash, item, onReserved }) {
   const { showToast } = useToast();
   const { t } = useI18n();
@@ -49,7 +71,11 @@ function ReserveForm({ publicHash, item, onReserved }) {
   const [loading, setLoading] = useState(false);
 
   function updateField(event) {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+    const { name, value } = event.target;
+    setForm((current) => ({
+      ...current,
+      [name]: name === 'guestPhone' ? formatPhoneMask(value) : value,
+    }));
   }
 
   async function handleSubmit(event) {
@@ -96,9 +122,14 @@ function ReserveForm({ publicHash, item, onReserved }) {
             <input
               className={styles.reserveInput}
               name="guestPhone"
-              placeholder={t('lists.phone')}
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel"
+              placeholder="(00) 00000-0000"
               value={form.guestPhone}
               onChange={updateField}
+              minLength={14}
+              maxLength={15}
               required
             />
             <div className={styles.modalActions}>
@@ -155,7 +186,10 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
     return (
       <article className={`${styles.compactItem} ${isReserved ? styles.compactItemReserved : ''}`}>
         <div className={styles.compactItemMain}>
-          <h3 className={styles.compactItemName}>{item.name}</h3>
+          <h3 className={styles.compactItemName}>
+            <span className={styles.compactItemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span>
+            {item.name}
+          </h3>
           {isManagementReserved ? (
             <span className={styles.giftedBy}>
               <span aria-hidden="true">♙</span>
@@ -176,21 +210,36 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
 
   if (isPublicOrManagement && isDetailed) {
     return (
-      <article className={`${styles.detailedItem} ${isReserved ? styles.publicItemReserved : ''}`}>
-        <button
-          className={styles.detailedItemSummary}
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => setExpanded((current) => !current)}
-        >
-          <h3 className={styles.detailedItemName}>{item.name}</h3>
-          <span className={styles.detailedItemToggle} aria-hidden="true">{expanded ? '−' : '+'}</span>
-        </button>
+      <article className={`${styles.detailedItem} ${isReserved ? styles.publicItemReserved : ''} ${expanded ? styles.detailedItemExpanded : ''}`}>
+        <div className={styles.detailedItemHeader}>
+          <button
+            className={styles.detailedItemSummary}
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((current) => !current)}
+          >
+            <h3 className={styles.detailedItemName}>{item.name}</h3>
+          </button>
+          <div className={styles.detailedItemHeaderActions}>
+            {isManagement ? (
+              <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
+            ) : null}
+            <button
+              className={`${styles.detailedItemToggle} ${expanded ? styles.detailedItemToggleOpen : ''}`}
+              type="button"
+              aria-expanded={expanded}
+              aria-label={expanded ? t('lists.collapseItem') : t('lists.expandItem')}
+              onClick={() => setExpanded((current) => !current)}
+            >
+              <ChevronDownIcon width="22" height="22" />
+            </button>
+          </div>
+        </div>
         {expanded ? (
           <div className={styles.detailedItemBody}>
             <div className={styles.itemImage}>
               <span className={styles.itemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span>
-              {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 320px" src={item.imageUrl} unoptimized /> : null}
+              {item.imageUrl ? <Image alt={item.name} fill sizes="(max-width: 768px) 100vw, 280px" src={item.imageUrl} unoptimized /> : null}
               {isReserved ? (
                 <div className={styles.reservedImageOverlay}>
                   <span className={styles.reservedPill}>
@@ -200,20 +249,19 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
                 </div>
               ) : null}
             </div>
-            {item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
-            <div className={styles.detailedItemMeta}>
-              {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : <span aria-hidden="true" />}
-              {isManagementReserved ? (
-                <span className={styles.giftedBy}>
-                  <span aria-hidden="true">♙</span>
-                  {t('lists.giftedBy', { name: giftedBy })}
-                </span>
-              ) : null}
-              {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
-              {isPublicReserved ? <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span> : null}
-              {isManagement ? (
-                <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
-              ) : null}
+            <div className={styles.detailedItemContent}>
+              {item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
+              <div className={styles.detailedItemMeta}>
+                {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : null}
+                {isManagementReserved ? (
+                  <span className={styles.giftedBy}>
+                    <span aria-hidden="true">♙</span>
+                    {t('lists.giftedBy', { name: giftedBy })}
+                  </span>
+                ) : null}
+                {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
+                {isPublicReserved ? <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span> : null}
+              </div>
             </div>
           </div>
         ) : null}

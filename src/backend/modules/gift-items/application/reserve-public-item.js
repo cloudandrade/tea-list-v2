@@ -14,8 +14,9 @@ export async function reservePublicItem({ publicHash, itemId, input }) {
 
   const guestName = normalizeText(input?.guestName);
   const guestPhone = normalizeText(input?.guestPhone);
+  const phoneDigits = guestPhone.replace(/\D/g, '');
 
-  if (guestName.length < 2 || guestPhone.length < 8) {
+  if (guestName.length < 2 || phoneDigits.length < 10 || phoneDigits.length > 11) {
     return { ok: false, status: 400, message: 'Informe nome e telefone para reservar.' };
   }
 

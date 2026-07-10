@@ -132,6 +132,21 @@ export function PlusIcon(props) {
   );
 }
 
+export function ChevronDownIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        d="M6 9l6 6 6-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
+
 export function TrashIcon(props) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
