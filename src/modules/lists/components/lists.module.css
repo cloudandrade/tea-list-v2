@@ -19,6 +19,71 @@
   background-color: #fff8f5;
 }
 
+.managementToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.managementToolbar :global(.primary-button) {
+  width: auto;
+  min-width: min(100%, 220px);
+  flex: 1 1 220px;
+}
+
+.managementSecondaryButton {
+  display: inline-flex;
+  min-height: 48px;
+  min-width: min(100%, 220px);
+  flex: 1 1 220px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border: 1px solid var(--list-color, var(--color-accent));
+  border-radius: 999px;
+  color: var(--list-color, var(--color-accent));
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.managementSecondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.managementSecondaryButton svg {
+  flex-shrink: 0;
+}
+
+.bulkRangeRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bulkSelectionHint,
+.bulkFieldsHint,
+.bulkSelectionError {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.bulkSelectionHint {
+  color: var(--list-color, var(--color-accent));
+  font-weight: 600;
+}
+
+.bulkSelectionError {
+  color: #8f2f22;
+  font-weight: 600;
+}
+
 .topBar {
   position: sticky;
   top: 0;
@@ -710,11 +775,11 @@
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(255, 248, 245, 0) 0%,
-    rgba(255, 248, 245, 0) 28%,
-    rgba(255, 248, 245, 0.35) 52%,
-    rgba(255, 248, 245, 0.78) 78%,
-    #fff8f5 100%
+    transparent 0%,
+    transparent 38%,
+    color-mix(in srgb, var(--cover-edge-color, #fff8f5) 28%, transparent) 58%,
+    color-mix(in srgb, var(--cover-edge-color, #fff8f5) 72%, var(--cover-fade-to, #fff8f5)) 78%,
+    var(--cover-fade-to, #fff8f5) 100%
   );
 }
 
@@ -845,6 +910,8 @@
   font-style: italic;
   font-weight: 400;
   line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .listMessage {
@@ -870,6 +937,8 @@
   margin: 0;
   color: var(--color-muted);
   line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 .publicBadge {
@@ -883,6 +952,26 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.listCoverBadge {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  z-index: 3;
+  transform: translateX(-50%);
+  color: color-mix(in srgb, var(--list-color) 55%, #1e1b18);
+  background: color-mix(in srgb, var(--list-color) 28%, rgba(255, 248, 245, 0.42));
+  border: 1px solid color-mix(in srgb, var(--list-color) 22%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(30, 27, 24, 0.08);
+}
+
+@media (min-width: 768px) {
+  .listCoverBadge {
+    top: 18px;
+  }
 }
 
 .giftsSection {
@@ -996,7 +1085,7 @@
   align-items: baseline;
   gap: 10px;
   margin: 0;
-  color: #1e1b18;
+  color: var(--list-color, var(--color-primary));
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 1.25rem;
   font-weight: 500;
@@ -1054,7 +1143,7 @@
 .detailedItemName {
   margin: 0;
   overflow: hidden;
-  color: #1e1b18;
+  color: var(--list-color, var(--color-primary));
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 1.25rem;
   font-weight: 500;
@@ -1200,7 +1289,7 @@
   width: 100%;
   max-width: 358px;
   gap: 0;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   border: 1px solid rgba(134, 115, 108, 0.05);
   border-radius: 12px;
@@ -1226,7 +1315,7 @@
 .publicItemCard .itemName {
   margin-top: 24px;
   margin-bottom: 8px;
-  color: #1e1b18;
+  color: var(--list-color, var(--color-primary));
   font-size: 1.5rem;
   line-height: 1.4;
 }
@@ -1243,7 +1332,7 @@
 }
 
 .publicItemReserved .itemName {
-  color: rgba(83, 67, 61, 0.7);
+  color: color-mix(in srgb, var(--list-color, var(--color-primary)) 70%, transparent);
 }
 
 .publicItemReserved .itemDescription {
@@ -1364,6 +1453,7 @@
 
 .publicItemMeta {
   align-items: center;
+  flex-wrap: wrap;
   color: #53433d;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -1384,14 +1474,147 @@
   letter-spacing: 0.05em;
 }
 
+.reservedStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.reservedStatusPix {
+  padding: 4px 4px 4px 0;
+}
+
 .giftedBy {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  max-width: 100%;
   color: var(--list-color, #586330);
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.pixViewButton {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--list-color, var(--color-accent)) 35%, transparent);
+  border-radius: 999px;
+  color: var(--list-color, var(--color-accent));
+  background: rgba(255, 248, 245, 0.95);
+  box-shadow: 0 4px 10px rgba(30, 27, 24, 0.06);
+  cursor: pointer;
+}
+
+.pixViewButton:hover {
+  background: #fff;
+}
+
+.pixPaymentBlock {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(217, 194, 186, 0.4);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--list-color, #86452a) 6%, #fff8f5);
+}
+
+.pixPaymentTitle {
+  margin: 0;
+  color: var(--list-color, var(--color-primary));
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.pixPaymentHint {
+  margin: 4px 0 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.pixPaymentKeyBox {
+  display: grid;
+  gap: 4px;
+}
+
+.pixPaymentLabel {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pixPaymentKeyRow {
+  display: grid;
+  gap: 8px;
+}
+
+.pixPaymentKey {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  word-break: break-all;
+}
+
+.pixCopyButton {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--list-color, var(--color-accent)) 40%, transparent);
+  border-radius: 999px;
+  color: var(--list-color, var(--color-accent));
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pixCopyButton:hover {
+  background: #fff;
+}
+
+.pixCopyButton svg {
+  flex-shrink: 0;
+}
+
+.pixPaymentQr {
+  display: grid;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.pixPaymentQr img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+}
+
+.reserveModalWithPix,
+.pixDetailsModal {
+  width: min(100%, 420px);
+  max-height: min(92vh, 720px);
+  overflow: auto;
 }
 
 .modalOverlay {
@@ -1484,6 +1707,84 @@
 .itemFormSecondaryButton:disabled {
   cursor: not-allowed;
   opacity: 0.72;
+}
+
+.pixCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pixCheckbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+}
+
+.pixFields {
+  display: grid;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid rgba(217, 194, 186, 0.35);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-surface-muted) 70%, #fff8f5);
+}
+
+.pixQrUpload {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  border: 2px dashed rgba(217, 194, 186, 0.55);
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(239, 230, 226, 0.86), rgba(239, 230, 226, 0.86)),
+    linear-gradient(135deg, #efe6e2, #fff8f5);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: center;
+}
+
+.pixQrUploadWithImage {
+  border-style: solid;
+  background-color: #fff8f5;
+}
+
+.pixQrUploadWithImage > div {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 248, 245, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+.pixQrUpload strong {
+  display: block;
+  color: var(--color-primary);
+}
+
+.pixQrUpload p {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.pixQrClear {
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .modalTitle {

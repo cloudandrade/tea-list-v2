@@ -13,6 +13,9 @@ const initialForm = {
   quantity: 1,
   description: '',
   imageUrl: '',
+  pixEnabled: false,
+  pixKey: '',
+  pixQrCodeUrl: '',
 };
 
 function makeImageBackground(imageUrl) {
@@ -35,6 +38,9 @@ function makeInitialForm(item) {
     quantity: item.quantity || 1,
     description: item.description || '',
     imageUrl: item.imageUrl || '',
+    pixEnabled: Boolean(item.pixEnabled),
+    pixKey: item.pixKey || '',
+    pixQrCodeUrl: item.pixQrCodeUrl || '',
   };
 }
 
@@ -47,6 +53,20 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
 
   function updateField(event) {
     setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  }
+
+  function updatePixEnabled(event) {
+    const pixEnabled = event.target.checked;
+    setForm((current) => ({
+      ...current,
+      pixEnabled,
+      ...(pixEnabled
+        ? {}
+        : {
+            pixKey: '',
+            pixQrCodeUrl: '',
+          }),
+    }));
   }
 
   function changeQuantity(delta) {
@@ -74,8 +94,40 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
       });
   }
 
+  function handlePixQrCodeChange(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      showToast({ type: 'error', message: t('lists.invalidImage') });
+      return;
+    }
+
+    // Qualidade alta para o QR Code continuar legível.
+    compressImageFile(file, { maxWidth: 720, maxHeight: 720, quality: 0.92 })
+      .then((imageDataUrl) => {
+        setForm((current) => ({ ...current, pixQrCodeUrl: imageDataUrl }));
+      })
+      .catch((compressionError) => {
+        showToast({ type: 'error', message: compressionError.message });
+      });
+  }
+
+  function clearPixQrCode() {
+    setForm((current) => ({ ...current, pixQrCodeUrl: '' }));
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (form.pixEnabled && !String(form.pixKey || '').trim()) {
+      showToast({ type: 'error', message: t('lists.pixKeyRequired') });
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -83,6 +135,9 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
         ...form,
         price: Number(String(form.price).replace(',', '.')) || 0,
         quantity: isEdit ? 1 : Math.max(Number(form.quantity || 1), 1),
+        pixEnabled: Boolean(form.pixEnabled),
+        pixKey: form.pixEnabled ? String(form.pixKey || '').trim() : '',
+        pixQrCodeUrl: form.pixEnabled ? String(form.pixQrCodeUrl || '') : '',
       });
       onClose();
     } finally {
@@ -165,6 +220,46 @@ export default function ItemFormModal({ mode = 'create', item = null, onClose, o
                 onChange={updateField}
               />
             </label>
+
+            <label className={styles.pixCheckbox}>
+              <input type="checkbox" checked={form.pixEnabled} onChange={updatePixEnabled} />
+              <span>{t('lists.pixEnabled')}</span>
+            </label>
+
+            {form.pixEnabled ? (
+              <div className={styles.pixFields}>
+                <label className={styles.fieldPlain}>
+                  <span className={styles.label}>{t('lists.pixKey')}</span>
+                  <input
+                    className={styles.reserveInput}
+                    name="pixKey"
+                    placeholder={t('lists.pixKeyPlaceholder')}
+                    value={form.pixKey}
+                    onChange={updateField}
+                    required
+                  />
+                </label>
+
+                <div className={styles.fieldPlain}>
+                  <span className={styles.label}>{t('lists.pixQrCodeOptional')}</span>
+                  <label
+                    className={`${styles.pixQrUpload} ${form.pixQrCodeUrl ? styles.pixQrUploadWithImage : ''}`}
+                    style={makeImageBackground(form.pixQrCodeUrl)}
+                  >
+                    <input className={styles.fileInput} type="file" accept="image/*" onChange={handlePixQrCodeChange} />
+                    <div>
+                      <strong>{t('lists.pixQrUpload')}</strong>
+                      <p>{form.pixQrCodeUrl ? t('lists.pixQrChange') : t('lists.pixQrHint')}</p>
+                    </div>
+                  </label>
+                  {form.pixQrCodeUrl ? (
+                    <button className={styles.pixQrClear} type="button" onClick={clearPixQrCode}>
+                      {t('lists.pixQrClear')}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <aside className={styles.itemFormImagePanel}>

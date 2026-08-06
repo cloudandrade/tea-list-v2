@@ -21,6 +21,9 @@ function toGiftItem(document) {
     quantity: document.quantity,
     description: document.description,
     imageUrl: document.imageUrl,
+    pixEnabled: Boolean(document.pixEnabled),
+    pixKey: document.pixKey || '',
+    pixQrCodeUrl: document.pixQrCodeUrl || '',
     reservedQuantity,
     availableQuantity: Math.max(Number(document.quantity || 0) - reservedQuantity, 0),
     isReserved: reservedQuantity >= Number(document.quantity || 0),
@@ -40,25 +43,46 @@ export function toPublicGiftItem(item) {
     return null;
   }
 
+  // Expõe só o nome de quem reservou (sem telefone) para o status "Presenteado por".
+  const publicReservations = (item.reservations || []).map((reservation) => ({
+    id: reservation.id,
+    guestName: reservation.guestName,
+    quantity: reservation.quantity,
+    createdAt: reservation.createdAt,
+  }));
+
   return {
     ...item,
-    reservations: [],
+    reservations: publicReservations,
   };
 }
 
-export async function createGiftItem({ listId, userId, name, price, quantity, description, imageUrl }) {
-  await connectMongo();
-  const item = await GiftItemModel.create({
-    listId,
-    userId,
-    name,
-    price,
-    quantity,
-    description,
-    imageUrl,
-  });
+export async function findPixQrCodeByHash({ userId, hash, excludeItemId }) {
+  if (!hash) {
+    return null;
+  }
 
-  return toGiftItem(item);
+  await connectMongo();
+  const query = {
+    userId,
+    pixQrCodeHash: hash,
+    pixQrCodeUrl: { $ne: '' },
+  };
+
+  if (excludeItemId) {
+    query._id = { $ne: excludeItemId };
+  }
+
+  const document = await GiftItemModel.findOne(query).select('pixQrCodeUrl pixQrCodeHash').lean();
+
+  if (!document?.pixQrCodeUrl) {
+    return null;
+  }
+
+  return {
+    pixQrCodeUrl: document.pixQrCodeUrl,
+    pixQrCodeHash: document.pixQrCodeHash || hash,
+  };
 }
 
 export async function createGiftItems(items) {
@@ -128,6 +152,22 @@ export async function updateGiftItem({ listId, itemId, userId, input }) {
 
   if (input.imageUrl !== undefined) {
     item.imageUrl = input.imageUrl;
+  }
+
+  if (input.pixEnabled !== undefined) {
+    item.pixEnabled = Boolean(input.pixEnabled);
+  }
+
+  if (input.pixKey !== undefined) {
+    item.pixKey = input.pixKey;
+  }
+
+  if (input.pixQrCodeUrl !== undefined) {
+    item.pixQrCodeUrl = input.pixQrCodeUrl;
+  }
+
+  if (input.pixQrCodeHash !== undefined) {
+    item.pixQrCodeHash = input.pixQrCodeHash;
   }
 
   await item.save();

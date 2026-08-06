@@ -61,6 +61,23 @@ const giftItemSchema = new Schema(
       type: String,
       default: '',
     },
+    pixEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    pixKey: {
+      type: String,
+      default: '',
+    },
+    pixQrCodeUrl: {
+      type: String,
+      default: '',
+    },
+    pixQrCodeHash: {
+      type: String,
+      default: '',
+      index: true,
+    },
     reservations: {
       type: [reservationSchema],
       default: [],
@@ -70,6 +87,7 @@ const giftItemSchema = new Schema(
 );
 
 giftItemSchema.index({ listId: 1, createdAt: 1 });
+giftItemSchema.index({ userId: 1, pixQrCodeHash: 1 });
 
 if (mongoose.models[MODEL_NAME]) {
   mongoose.deleteModel(MODEL_NAME);

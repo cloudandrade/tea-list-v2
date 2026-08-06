@@ -55,6 +55,13 @@ export function updateListItem(listId, itemId, payload) {
   });
 }
 
+export function bulkUpdateListItems(listId, payload) {
+  return requestJson(`/api/v2/lists/${listId}/items/bulk`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
 export function deleteListItem(listId, itemId) {
   return requestJson(`/api/v2/lists/${listId}/items/${itemId}`, {
     method: 'DELETE',

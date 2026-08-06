@@ -1,5 +1,6 @@
 import { findGiftListByIdForUser, updateGiftListCounters } from '@/backend/modules/gift-lists/infra/gift-list.repository';
 import { createGiftItems, summarizeGiftItemsByList } from '../infra/gift-item.repository';
+import { resolvePixFields } from './resolve-pix-fields';
 
 function normalizeText(value) {
   return String(value || '').trim();
@@ -18,6 +19,12 @@ export async function createListItem({ listId, userId, input }) {
     return { ok: false, status: 400, message: 'Informe o nome do item.' };
   }
 
+  const pixFields = await resolvePixFields({ userId, input });
+
+  if (!pixFields.ok) {
+    return { ok: false, status: pixFields.status, message: pixFields.message };
+  }
+
   const quantity = Math.max(Number(input?.quantity || 1), 1);
   const itemsToCreate = Array.from({ length: quantity }, () => ({
     listId,
@@ -27,6 +34,10 @@ export async function createListItem({ listId, userId, input }) {
     quantity: 1,
     description: normalizeText(input?.description),
     imageUrl: String(input?.imageUrl || ''),
+    pixEnabled: pixFields.pixEnabled,
+    pixKey: pixFields.pixKey,
+    pixQrCodeUrl: pixFields.pixQrCodeUrl,
+    pixQrCodeHash: pixFields.pixQrCodeHash,
   }));
   const items = await createGiftItems(itemsToCreate);
 

@@ -1,11 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/app/components/I18nProvider';
 import { useToast } from '@/app/components/ToastProvider';
-import { PencilIcon, TrashIcon, ChevronDownIcon } from '@/modules/auth/components/icons';
+import { CopyIcon, EyeIcon, PencilIcon, TrashIcon, ChevronDownIcon } from '@/modules/auth/components/icons';
 import { reservePublicItem } from '../services/listApi';
+import { sampleImageBottomColor } from '../services/sampleImageBottomColor';
 import styles from './lists.module.css';
 
 function formatCurrency(value, locale) {
@@ -25,6 +26,8 @@ function makeCoverBackground(imageUrl) {
     backgroundSize: 'cover',
   };
 }
+
+const PAGE_SURFACE = '#fff8f5';
 
 const paletteColors = {
   terracotta: '#86452a',
@@ -63,12 +66,130 @@ function formatPhoneMask(value) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+function PixPaymentBlock({ item }) {
+  const { showToast } = useToast();
+  const { t } = useI18n();
+
+  if (!item?.pixEnabled || !item?.pixKey) {
+    return null;
+  }
+
+  async function copyPixKey() {
+    try {
+      await navigator.clipboard.writeText(item.pixKey);
+      showToast({ type: 'success', message: t('lists.pixKeyCopied') });
+    } catch {
+      showToast({ type: 'error', message: t('lists.pixKeyCopyError') });
+    }
+  }
+
+  return (
+    <div className={styles.pixPaymentBlock}>
+      <div>
+        <h4 className={styles.pixPaymentTitle}>{t('lists.pixPaymentTitle')}</h4>
+        <p className={styles.pixPaymentHint}>{t('lists.pixPaymentHint')}</p>
+      </div>
+      <div className={styles.pixPaymentKeyBox}>
+        <span className={styles.pixPaymentLabel}>{t('lists.pixKey')}</span>
+        <div className={styles.pixPaymentKeyRow}>
+          <p className={styles.pixPaymentKey}>{item.pixKey}</p>
+          <button
+            className={styles.pixCopyButton}
+            type="button"
+            onClick={copyPixKey}
+            aria-label={t('lists.copyPixKey')}
+            title={t('lists.copyPixKey')}
+          >
+            <CopyIcon width="16" height="16" />
+            <span>{t('lists.copyPixKey')}</span>
+          </button>
+        </div>
+      </div>
+      {item.pixQrCodeUrl ? (
+        <div className={styles.pixPaymentQr}>
+          <Image
+            alt={t('lists.pixQrCodeOptional')}
+            height={180}
+            src={item.pixQrCodeUrl}
+            unoptimized
+            width={180}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PixDetailsModal({ item, onClose }) {
+  const { t } = useI18n();
+
+  return (
+    <div className={styles.modalOverlay} role="presentation" onClick={onClose}>
+      <section
+        className={`${styles.reserveModal} ${styles.pixDetailsModal}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pix-details-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div>
+          <h3 className={styles.modalTitle} id="pix-details-title">
+            {t('lists.pixDetailsTitle')}
+          </h3>
+          <p className={styles.modalText}>{item.name}</p>
+        </div>
+        <PixPaymentBlock item={item} />
+        <div className={styles.modalActions}>
+          <button className={styles.reserveButton} type="button" onClick={onClose}>
+            {t('common.close')}
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ReservedStatus({ item, mode = 'badge', giftedBy }) {
+  const { t } = useI18n();
+  const [pixOpen, setPixOpen] = useState(false);
+  const isPix = Boolean(item.pixEnabled && item.pixKey);
+  const showGiftedBy = mode === 'giftedBy';
+
+  return (
+    <>
+      <div className={`${styles.reservedStatus} ${isPix ? styles.reservedStatusPix : ''}`}>
+        {showGiftedBy ? (
+          <span className={styles.giftedBy}>
+            <span aria-hidden="true">♙</span>
+            {t('lists.giftedBy', { name: giftedBy || t('lists.anonymousGuest') })}
+          </span>
+        ) : (
+          <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span>
+        )}
+        {isPix ? (
+          <button
+            className={styles.pixViewButton}
+            type="button"
+            onClick={() => setPixOpen(true)}
+            aria-label={t('lists.viewPixDetails')}
+            title={t('lists.viewPixDetails')}
+          >
+            <EyeIcon width="18" height="18" />
+          </button>
+        ) : null}
+      </div>
+      {pixOpen ? <PixDetailsModal item={item} onClose={() => setPixOpen(false)} /> : null}
+    </>
+  );
+}
+
 function ReserveForm({ publicHash, item, onReserved }) {
   const { showToast } = useToast();
   const { t } = useI18n();
   const [form, setForm] = useState({ guestName: '', guestPhone: '' });
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const isPix = Boolean(item.pixEnabled && item.pixKey);
 
   function updateField(event) {
     const { name, value } = event.target;
@@ -96,7 +217,14 @@ function ReserveForm({ publicHash, item, onReserved }) {
   }
 
   if (item.isReserved) {
-    return <p className={styles.itemReservedBadge}>{t('lists.reserved')}</p>;
+    const reservedBy = item.reservations?.[0]?.guestName;
+    return (
+      <ReservedStatus
+        item={item}
+        mode={reservedBy ? 'giftedBy' : 'badge'}
+        giftedBy={reservedBy}
+      />
+    );
   }
 
   return (
@@ -106,7 +234,13 @@ function ReserveForm({ publicHash, item, onReserved }) {
       </button>
       {open ? (
         <div className={styles.modalOverlay} role="presentation" onClick={() => setOpen(false)}>
-          <form className={styles.reserveModal} onSubmit={handleSubmit} role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+          <form
+            className={`${styles.reserveModal} ${isPix ? styles.reserveModalWithPix : ''}`}
+            onSubmit={handleSubmit}
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div>
               <h3 className={styles.modalTitle}>{t('lists.reserveItem')}</h3>
               <p className={styles.modalText}>{item.name}</p>
@@ -132,6 +266,7 @@ function ReserveForm({ publicHash, item, onReserved }) {
               maxLength={15}
               required
             />
+            {isPix ? <PixPaymentBlock item={item} /> : null}
             <div className={styles.modalActions}>
               <button className={styles.textButton} type="button" onClick={() => setOpen(false)}>
                 {t('common.cancel')}
@@ -175,12 +310,24 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
   const isManagementReserved = isManagement && item.isReserved;
   const isReserved = isPublicReserved || isManagementReserved;
   const giftedBy = item.reservations?.[0]?.guestName || t('lists.anonymousGuest');
+  const hasReservedGuestName = Boolean(item.reservations?.[0]?.guestName);
   const hasPrice = Number(item.price || 0) > 0;
   const showImage = usesVisualCard || (isDetailed && expanded) || (!isPublicOrManagement && !isCompact);
   const showDescription = Boolean(
     item.description
     && (usesVisualCard || (isDetailed && expanded) || (!isPublicOrManagement && !isCompact)),
   );
+
+  function renderReservedStatus(preferredMode = 'badge') {
+    const mode = preferredMode === 'giftedBy' || hasReservedGuestName ? 'giftedBy' : 'badge';
+    return (
+      <ReservedStatus
+        item={item}
+        mode={mode}
+        giftedBy={giftedBy}
+      />
+    );
+  }
 
   if (isPublicOrManagement && isCompact) {
     return (
@@ -190,18 +337,13 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
             <span className={styles.compactItemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span>
             {item.name}
           </h3>
-          {isManagementReserved ? (
-            <span className={styles.giftedBy}>
-              <span aria-hidden="true">♙</span>
-              {t('lists.giftedBy', { name: giftedBy })}
-            </span>
-          ) : null}
+          {isManagementReserved ? renderReservedStatus('giftedBy') : null}
         </div>
         <div className={styles.compactItemActions}>
           {isManagement ? (
             <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
           ) : null}
-          {isPublicReserved ? <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span> : null}
+          {isPublicReserved ? renderReservedStatus('giftedBy') : null}
           {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
         </div>
       </article>
@@ -253,14 +395,9 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
               {item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
               <div className={styles.detailedItemMeta}>
                 {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : null}
-                {isManagementReserved ? (
-                  <span className={styles.giftedBy}>
-                    <span aria-hidden="true">♙</span>
-                    {t('lists.giftedBy', { name: giftedBy })}
-                  </span>
-                ) : null}
+                {isManagementReserved ? renderReservedStatus('giftedBy') : null}
                 {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
-                {isPublicReserved ? <span className={styles.itemReservedBadge}>{t('lists.reserved')}</span> : null}
+                {isPublicReserved ? renderReservedStatus('giftedBy') : null}
               </div>
             </div>
           </div>
@@ -269,7 +406,7 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
     );
   }
 
-  const showMeta = hasPrice || !usesVisualCard || isManagementReserved || (publicHash && !isPublicReserved);
+  const showMeta = hasPrice || !usesVisualCard || isManagementReserved || Boolean(publicHash);
 
   return (
     <article className={`${styles.itemCard} ${usesVisualCard ? styles.publicItemCard : ''} ${isManagement ? styles.managementItemCard : ''} ${isReserved ? styles.publicItemReserved : ''}`}>
@@ -297,13 +434,9 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
               {t('lists.available', { available: item.availableQuantity, total: item.quantity })}
             </span>
           ) : null}
-          {isManagementReserved ? (
-            <span className={styles.giftedBy}>
-              <span aria-hidden="true">♙</span>
-              {t('lists.giftedBy', { name: giftedBy })}
-            </span>
-          ) : null}
+          {isManagementReserved ? renderReservedStatus('giftedBy') : null}
           {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
+          {isPublicReserved ? renderReservedStatus('giftedBy') : null}
         </div>
       ) : null}
       {isManagement ? (
@@ -323,6 +456,7 @@ export default function ListDisplay({
 }) {
   const { t } = useI18n();
   const [items, setItems] = useState(initialItems);
+  const [coverEdgeColor, setCoverEdgeColor] = useState(PAGE_SURFACE);
   const listColor = paletteColors[list.colorPalette] || paletteColors.terracotta;
   const patternClass = styles[`listPattern${list.backgroundPattern}`] || styles.listPatternplain;
   const isPublic = Boolean(publicHash);
@@ -330,6 +464,7 @@ export default function ListDisplay({
   const isBlocksMode = displayMode === 'blocks';
   const isDetailedMode = displayMode === 'detailed';
   const isCompactMode = displayMode === 'compact';
+  const coverFadeTo = `color-mix(in srgb, ${listColor} 14%, ${PAGE_SURFACE})`;
   const mainClass = isPublic
     ? `${styles.main} ${styles.publicMain}`
     : isManagement
@@ -337,6 +472,33 @@ export default function ListDisplay({
     : isBlocksMode
       ? `${styles.main} ${styles.mainBlocks} ${styles.listThemeSurface} ${patternClass}`
       : `${styles.main} ${styles.listThemeSurface} ${patternClass}`;
+
+  useEffect(() => {
+    let active = true;
+
+    async function detectCoverEdgeColor() {
+      if (!list.coverImageUrl) {
+        if (active) {
+          setCoverEdgeColor(PAGE_SURFACE);
+        }
+        return;
+      }
+
+      const sampledColor = await sampleImageBottomColor(list.coverImageUrl, {
+        fallback: PAGE_SURFACE,
+      });
+
+      if (active) {
+        setCoverEdgeColor(sampledColor);
+      }
+    }
+
+    detectCoverEdgeColor();
+
+    return () => {
+      active = false;
+    };
+  }, [list.coverImageUrl]);
 
   let gridClass = styles.itemsGrid;
 
@@ -362,11 +524,15 @@ export default function ListDisplay({
         <header className={styles.listHero}>
           <div
             className={styles.listCover}
-            style={makeCoverBackground(list.coverImageUrl) || undefined}
+            style={{
+              ...(makeCoverBackground(list.coverImageUrl) || {}),
+              '--cover-edge-color': coverEdgeColor,
+              '--cover-fade-to': coverFadeTo,
+            }}
           >
+            <span className={`${styles.publicBadge} ${styles.listCoverBadge}`}>{list.type}</span>
             <div className={styles.listHeroFade} aria-hidden="true" />
             <div className={styles.listHeroContent}>
-              <span className={styles.publicBadge}>{list.type}</span>
               <h1 className={styles.listHeroTitle}>{list.title}</h1>
               {list.subtitle ? <p className={styles.listSubtitle}>{list.subtitle}</p> : null}
               {list.message ? <p className={styles.listHeroMessage}>{list.message}</p> : null}

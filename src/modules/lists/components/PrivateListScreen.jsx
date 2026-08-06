@@ -7,7 +7,8 @@ import { useI18n } from '@/app/components/I18nProvider';
 import { useNavigationLoading } from '@/app/components/NavigationLoadingProvider';
 import { useToast } from '@/app/components/ToastProvider';
 import { BackIcon, PencilIcon, PlusIcon, TrashIcon } from '@/modules/auth/components/icons';
-import { createListItem, deleteList, deleteListItem, getList, updateListItem } from '../services/listApi';
+import { createListItem, deleteList, deleteListItem, getList, updateListItem, bulkUpdateListItems } from '../services/listApi';
+import BulkEditItemsModal from './BulkEditItemsModal';
 import ItemFormModal from './ItemFormModal';
 import ListBottomNav from './ListBottomNav';
 import ListDisplay from './ListDisplay';
@@ -41,6 +42,7 @@ export default function PrivateListScreen({ listId }) {
   const [deleteListOpen, setDeleteListOpen] = useState(false);
   const [deleteListLoading, setDeleteListLoading] = useState(false);
   const [itemModal, setItemModal] = useState(null);
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
 
   async function reloadList() {
     const response = await getList(listId);
@@ -93,6 +95,20 @@ export default function PrivateListScreen({ listId }) {
       const response = await createListItem(listId, payload);
       await reloadList();
       showToast({ type: 'success', message: t('lists.itemsAdded', { count: response.items?.length || 1 }) });
+    } catch (requestError) {
+      showToast({ type: 'error', message: requestError.message });
+      throw requestError;
+    }
+  }
+
+  async function handleBulkUpdateItems(payload) {
+    try {
+      const response = await bulkUpdateListItems(listId, payload);
+      await reloadList();
+      showToast({
+        type: 'success',
+        message: t('lists.bulkEditSuccess', { count: response.updatedCount || 0 }),
+      });
     } catch (requestError) {
       showToast({ type: 'error', message: requestError.message });
       throw requestError;
@@ -176,10 +192,21 @@ export default function PrivateListScreen({ listId }) {
 
       <div className={`${styles.managementPageSurface} ${patternClass}`} style={{ '--list-color': listColor }}>
         <section className={styles.main}>
-          <button className="primary-button" type="button" onClick={() => setItemModal({ mode: 'create', item: null })}>
-            <PlusIcon width="18" height="18" />
-            {t('lists.createNewItem')}
-          </button>
+          <div className={styles.managementToolbar}>
+            <button className="primary-button" type="button" onClick={() => setItemModal({ mode: 'create', item: null })}>
+              <PlusIcon width="18" height="18" />
+              {t('lists.createNewItem')}
+            </button>
+            <button
+              className={styles.managementSecondaryButton}
+              type="button"
+              onClick={() => setBulkEditOpen(true)}
+              disabled={items.length === 0}
+            >
+              <PencilIcon width="18" height="18" />
+              {t('lists.bulkEditItems')}
+            </button>
+          </div>
         </section>
 
         <ListDisplay
@@ -211,6 +238,14 @@ export default function PrivateListScreen({ listId }) {
               ? handleUpdateItem(itemModal.item.id, payload)
               : handleCreateItem(payload)
           )}
+        />
+      ) : null}
+
+      {bulkEditOpen ? (
+        <BulkEditItemsModal
+          itemCount={items.length}
+          onClose={() => setBulkEditOpen(false)}
+          onSubmit={handleBulkUpdateItems}
         />
       ) : null}
 
