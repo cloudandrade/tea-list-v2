@@ -245,20 +245,29 @@ a {
   text-align: center;
 }
 
-.custom-loading-spinner {
+.custom-loading-spinner,
+.app-spinner {
   display: block;
-  width: 118px;
-  height: 162px;
-  background-image: url('/loading-frame-1.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  animation: custom-loading-frames 650ms steps(1, end) infinite;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(134, 69, 42, 0.18);
+  border-top-color: var(--color-primary);
+  border-radius: 999px;
+  animation: app-spinner-rotate 0.7s linear infinite;
 }
 
-.custom-loading-spinner-large {
-  width: 156px;
-  height: 214px;
+.custom-loading-spinner-large,
+.app-spinner-large {
+  width: 56px;
+  height: 56px;
+  border-width: 4px;
+}
+
+.app-loading-inline {
+  display: grid;
+  min-height: 40vh;
+  place-items: center;
+  padding: 48px 16px;
 }
 
 .app-loading-title {
@@ -310,7 +319,7 @@ a {
 
 .route-loading-card {
   display: flex;
-  min-width: 172px;
+  min-width: 72px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -320,38 +329,8 @@ a {
   background: transparent;
 }
 
-.route-loading-card p {
-  margin: -20px 0 0;
-  color: var(--color-primary);
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 2.25rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-@keyframes custom-loading-frames {
-  0%,
-  19.99% {
-    background-image: url('/loading-frame-1.png');
-  }
-
-  20%,
-  39.99% {
-    background-image: url('/loading-frame-2.png');
-  }
-
-  40%,
-  59.99% {
-    background-image: url('/loading-frame-3.png');
-  }
-
-  60%,
-  79.99% {
-    background-image: url('/loading-frame-4.png');
-  }
-
-  80%,
-  100% {
-    background-image: url('/loading-frame-5.png');
+@keyframes app-spinner-rotate {
+  to {
+    transform: rotate(360deg);
   }
 }

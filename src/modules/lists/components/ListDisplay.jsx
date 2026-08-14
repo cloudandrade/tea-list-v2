@@ -337,13 +337,12 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
             <span className={styles.compactItemNumber}>{String(itemIndex + 1).padStart(2, '0')}</span>
             {item.name}
           </h3>
-          {isManagementReserved ? renderReservedStatus('giftedBy') : null}
+          {isReserved ? renderReservedStatus('giftedBy') : null}
         </div>
         <div className={styles.compactItemActions}>
           {isManagement ? (
             <ManagementActions item={item} onDeleteItem={onDeleteItem} onEditItem={onEditItem} />
           ) : null}
-          {isPublicReserved ? renderReservedStatus('giftedBy') : null}
           {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
         </div>
       </article>
@@ -361,6 +360,11 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
             onClick={() => setExpanded((current) => !current)}
           >
             <h3 className={styles.detailedItemName}>{item.name}</h3>
+            {isReserved ? (
+              <div className={styles.detailedItemReservedHint}>
+                {renderReservedStatus('giftedBy')}
+              </div>
+            ) : null}
           </button>
           <div className={styles.detailedItemHeaderActions}>
             {isManagement ? (
@@ -395,9 +399,7 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
               {item.description ? <p className={styles.itemDescription}>{item.description}</p> : null}
               <div className={styles.detailedItemMeta}>
                 {hasPrice ? <span>{formatCurrency(item.price, locale)}</span> : null}
-                {isManagementReserved ? renderReservedStatus('giftedBy') : null}
                 {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
-                {isPublicReserved ? renderReservedStatus('giftedBy') : null}
               </div>
             </div>
           </div>
@@ -406,7 +408,7 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
     );
   }
 
-  const showMeta = hasPrice || !usesVisualCard || isManagementReserved || Boolean(publicHash);
+  const showMeta = hasPrice || !usesVisualCard || (publicHash && !isPublicReserved);
 
   return (
     <article className={`${styles.itemCard} ${usesVisualCard ? styles.publicItemCard : ''} ${isManagement ? styles.managementItemCard : ''} ${isReserved ? styles.publicItemReserved : ''}`}>
@@ -425,6 +427,11 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
         </div>
       ) : null}
       <h3 className={styles.itemName}>{item.name}</h3>
+      {isReserved ? (
+        <div className={styles.itemGiftedByRow}>
+          {renderReservedStatus('giftedBy')}
+        </div>
+      ) : null}
       {showDescription ? <p className={styles.itemDescription}>{item.description}</p> : null}
       {showMeta ? (
         <div className={`${styles.itemMeta} ${usesVisualCard ? styles.publicItemMeta : ''}`}>
@@ -434,9 +441,7 @@ function ItemCard({ item, itemIndex, displayMode, publicHash, onReserved, isMana
               {t('lists.available', { available: item.availableQuantity, total: item.quantity })}
             </span>
           ) : null}
-          {isManagementReserved ? renderReservedStatus('giftedBy') : null}
           {publicHash && !isPublicReserved ? <ReserveForm item={item} publicHash={publicHash} onReserved={onReserved} /> : null}
-          {isPublicReserved ? renderReservedStatus('giftedBy') : null}
         </div>
       ) : null}
       {isManagement ? (

@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/app/components/I18nProvider';
 import { useToast } from '@/app/components/ToastProvider';
+import { CloudIcon } from '@/modules/auth/components/icons';
 import { getPublicList } from '../services/listApi';
 import ListDisplay from './ListDisplay';
 import styles from './lists.module.css';
+
+const WHATSAPP_URL = 'https://wa.me/5571987120712';
 
 const paletteColors = {
   terracotta: '#86452a',
@@ -63,7 +66,9 @@ export default function PublicListScreen({ publicHash }) {
   if (loading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>{t('lists.loadingPublicList')}</section>
+        <section className="app-loading-inline" aria-busy="true" aria-live="polite">
+          <span className="app-spinner" aria-hidden="true" />
+        </section>
       </main>
     );
   }
@@ -87,6 +92,21 @@ export default function PublicListScreen({ publicHash }) {
   return (
     <main className={`${styles.page} ${styles.publicPage} ${patternClass}`} style={{ '--list-color': listColor }}>
       <ListDisplay initialItems={items} list={list} publicHash={publicHash} />
+      <footer className={styles.publicFooter}>
+        <p className={styles.publicFooterCredit}>
+          <span>{t('lists.developedBy')}</span>
+          <a
+            className={styles.publicFooterLink}
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Jan
+            <CloudIcon className={styles.publicFooterCloud} width="15" height="15" />
+            Andrade
+          </a>
+        </p>
+      </footer>
     </main>
   );
 }

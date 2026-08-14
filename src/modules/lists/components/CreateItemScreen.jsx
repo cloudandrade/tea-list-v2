@@ -62,14 +62,18 @@ export default function CreateItemScreen({ listId }) {
   if (loading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>{t('lists.loadingList')}</section>
+        <section className="app-loading-inline" aria-busy="true" aria-live="polite">
+          <span className="app-spinner" aria-hidden="true" />
+        </section>
       </main>
     );
   }
 
   return (
     <main className={styles.page}>
-      <section className={styles.main}>{t('lists.addItemsOpening')}</section>
+      <section className="app-loading-inline" aria-busy="true" aria-live="polite">
+        <span className="app-spinner" aria-hidden="true" />
+      </section>
       <ItemFormModal
         mode="create"
         onClose={() => {

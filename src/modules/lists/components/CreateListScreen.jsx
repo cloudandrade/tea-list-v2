@@ -173,7 +173,9 @@ export default function CreateListScreen({ listId = '', mode = 'create' }) {
   if (initialLoading) {
     return (
       <main className={styles.page}>
-        <section className={styles.main}>{t('lists.loadingList')}</section>
+        <section className="app-loading-inline" aria-busy="true" aria-live="polite">
+          <span className="app-spinner" aria-hidden="true" />
+        </section>
       </main>
     );
   }

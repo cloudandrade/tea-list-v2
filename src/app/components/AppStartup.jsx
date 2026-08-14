@@ -46,10 +46,8 @@ export default function AppStartup({ children }) {
   if (status.state === 'checking') {
     return (
       <main className="app-loading-screen" aria-live="polite" aria-busy="true">
-        <div className="app-loading-card">
-          <span className="custom-loading-spinner custom-loading-spinner-large" aria-hidden="true" />
-          <p className="app-loading-title">Preparando Tea List</p>
-          <p className="app-loading-text">Verificando conexão com o MongoDB...</p>
+        <div className="app-loading-inline">
+          <span className="app-spinner app-spinner-large" aria-hidden="true" />
         </div>
       </main>
     );

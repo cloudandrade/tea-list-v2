@@ -162,6 +162,17 @@ export function TrashIcon(props) {
   );
 }
 
+export function CloudIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <path
+        d="M7.5 18h9.2a4.3 4.3 0 0 0 .8-8.5 5.5 5.5 0 0 0-10.5-1.4A3.8 3.8 0 0 0 7.5 18Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function CopyIcon(props) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>

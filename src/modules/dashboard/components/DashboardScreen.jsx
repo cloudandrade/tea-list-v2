@@ -149,8 +149,8 @@ export default function DashboardScreen() {
   if (loading) {
     return (
       <main className={styles.page}>
-        <section className={styles.content}>
-          <p>{t('dashboard.loadingLists')}</p>
+        <section className="app-loading-inline" aria-busy="true" aria-live="polite">
+          <span className="app-spinner" aria-hidden="true" />
         </section>
       </main>
     );
